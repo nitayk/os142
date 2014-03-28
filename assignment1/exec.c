@@ -10,7 +10,6 @@
 #include "our_header.h"
 
 char* strcpy(char *, char *);
-int add_path(char*);
 
 //int first_visit = 1;
 

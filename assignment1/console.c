@@ -264,7 +264,7 @@ consoleintr(int (*getc)(void))
     	break;
 
     case KEY_UP: // up arrow
-    	while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n') {
+      while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n') {
     		input.e--;
     	    consputc(BACKSPACE);
     	}

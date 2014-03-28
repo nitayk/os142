@@ -164,6 +164,7 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_wait2test\
 	_export\
 
 fs.img: mkfs README $(UPROGS)

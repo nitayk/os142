@@ -13,7 +13,6 @@
 
 #define MAXARGS 10
 
-
 struct cmd {
   int type;
 };
@@ -54,14 +53,11 @@ int fork1(void);  // Fork but panics on failure.
 void panic(char*);
 struct cmd *parsecmd(char*);
 
-
-
 // Execute cmd.  Never returns.
 void
 runcmd(struct cmd *cmd)
 {
   int p[2];
-
   struct backcmd *bcmd;
   struct execcmd *ecmd;
   struct listcmd *lcmd;
@@ -150,7 +146,6 @@ main(void)
 {
   static char buf[100];
   int fd;
-
   
   // Assumes three file descriptors open.
   while((fd = open("console", O_RDWR)) >= 0){

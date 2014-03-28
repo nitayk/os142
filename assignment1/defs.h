@@ -22,6 +22,7 @@ void            panic(char*) __attribute__((noreturn));
 
 // exec.c
 int             exec(char*, char**);
+int 		add_path(char*);
 
 // file.c
 struct file*    filealloc(void);
@@ -114,6 +115,7 @@ void            sched(void);
 void            sleep(void*, struct spinlock*);
 void            userinit(void);
 int             wait(void);
+int		wait2(int*, int*, int*);
 void            wakeup(void*);
 void            yield(void);
 
