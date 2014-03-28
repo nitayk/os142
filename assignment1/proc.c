@@ -65,6 +65,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = MEDIUM;
   p->queuenum = ptable.FRR_COUNTER++;
   p->iotime = 0;
   p->wtime = 0;
@@ -380,7 +381,39 @@ scheduler(void)
 	}
       }
       p = winner;
-      #endif // _FRR
+      #endif // FRR or FCFS
+      #ifdef _3Q
+      int minQueue = ptable.FRR_COUNTER; // dummy value
+      struct proc *winner = 0;
+      // look for HIGH priority process
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	if(p->state == RUNNABLE && p->priority == HIGH && p->queuenum < minQueue){
+	  minQueue = p->queuenum;
+	  winner = p;
+	}
+      }
+      if (!winner){
+	  // look for MEDIUM priority process
+	  minQueue = ptable.FRR_COUNTER; // dummy value
+	  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	  if(p->state == RUNNABLE && p->priority == MEDIUM && p->queuenum < minQueue){
+	    minQueue = p->queuenum;
+	    winner = p;
+	  }
+	}
+      }
+      if (!winner){
+	  // look for LOW priority process
+	  minQueue = ptable.FRR_COUNTER; // dummy value
+	  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	  if(p->state == RUNNABLE && p->priority == LOW && p->queuenum < minQueue){
+	    minQueue = p->queuenum;
+	    winner = p;
+	  }
+	}
+      }
+      p = winner;
+      #endif // 3Q
 	
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -502,6 +535,10 @@ wakeup1(void *chan)
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == SLEEPING && p->chan == chan){
       p->state = RUNNABLE;
+      if (p->priority == LOW)
+	p->priority = MEDIUM;
+      else
+	p->priority = HIGH;
       p->queuenum = ptable.FRR_COUNTER++;
       int tmp = ticks;
       tmp = tmp - p->sleeptime;
