@@ -51,10 +51,10 @@
 000007fd stat
 0000122c _edata
 00001238 _end
+00000000 waste_time_function
 0000094c link
 000008dc exit
 0000084b atoi
-00000000 waist_time_function
 00000712 strlen
 0000092c open
 0000075b strchr

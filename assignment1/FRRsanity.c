@@ -3,7 +3,7 @@
 #include "user.h"
 
 #define NUM_OF_CHILDRENS 10
-#define NUM_OF_CHILD_LOOPS 50
+#define NUM_OF_CHILD_LOOPS 1000
 
 int main(int argc, char *argv[])
 {

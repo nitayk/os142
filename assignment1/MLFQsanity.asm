@@ -4,13 +4,13 @@ _MLFQsanity:     file format elf32-i386
 
 Disassembly of section .text:
 
-00000000 <waist_time_function>:
+00000000 <waste_time_function>:
 #include "user.h"
 
 #define NUM_OF_CHILDRENS 20
-#define NUM_OF_CHILD_LOOPS 10
+#define NUM_OF_CHILD_LOOPS 500
 
-int waist_time_function() {
+int waste_time_function() {
    0:	55                   	push   %ebp
    1:	89 e5                	mov    %esp,%ebp
    3:	83 ec 20             	sub    $0x20,%esp
@@ -22,18 +22,18 @@ int waist_time_function() {
 	for (i =0 ; i < 1750 ; i++) {
   12:	d9 ee                	fldz   
   14:	dd 5d f0             	fstpl  -0x10(%ebp)
-  17:	eb 56                	jmp    6f <waist_time_function+0x6f>
+  17:	eb 56                	jmp    6f <waste_time_function+0x6f>
 		for (j = 0 ; j < i ; j++) {
   19:	d9 ee                	fldz   
   1b:	dd 5d e8             	fstpl  -0x18(%ebp)
-  1e:	eb 32                	jmp    52 <waist_time_function+0x52>
+  1e:	eb 32                	jmp    52 <waste_time_function+0x52>
 			for (k = 0 ; k < j ; k++) {
   20:	d9 ee                	fldz   
   22:	dd 5d e0             	fstpl  -0x20(%ebp)
-  25:	eb 0e                	jmp    35 <waist_time_function+0x35>
+  25:	eb 0e                	jmp    35 <waste_time_function+0x35>
 				sum += 1;
   27:	83 45 fc 01          	addl   $0x1,-0x4(%ebp)
-int waist_time_function() {
+int waste_time_function() {
 	int sum = 0;
 	double i,j,k = 0.0;
 	for (i =0 ; i < 1750 ; i++) {
@@ -50,9 +50,9 @@ int waist_time_function() {
   3f:	dd d8                	fstp   %st(0)
   41:	0f 97 c0             	seta   %al
   44:	84 c0                	test   %al,%al
-  46:	75 df                	jne    27 <waist_time_function+0x27>
+  46:	75 df                	jne    27 <waste_time_function+0x27>
 
-int waist_time_function() {
+int waste_time_function() {
 	int sum = 0;
 	double i,j,k = 0.0;
 	for (i =0 ; i < 1750 ; i++) {
@@ -68,10 +68,10 @@ int waist_time_function() {
   5c:	dd d8                	fstp   %st(0)
   5e:	0f 97 c0             	seta   %al
   61:	84 c0                	test   %al,%al
-  63:	75 bb                	jne    20 <waist_time_function+0x20>
-#define NUM_OF_CHILD_LOOPS 10
+  63:	75 bb                	jne    20 <waste_time_function+0x20>
+#define NUM_OF_CHILD_LOOPS 500
 
-int waist_time_function() {
+int waste_time_function() {
 	int sum = 0;
 	double i,j,k = 0.0;
 	for (i =0 ; i < 1750 ; i++) {
@@ -86,7 +86,7 @@ int waist_time_function() {
   7c:	dd d8                	fstp   %st(0)
   7e:	0f 97 c0             	seta   %al
   81:	84 c0                	test   %al,%al
-  83:	75 94                	jne    19 <waist_time_function+0x19>
+  83:	75 94                	jne    19 <waste_time_function+0x19>
 			for (k = 0 ; k < j ; k++) {
 				sum += 1;
 			}
@@ -157,21 +157,21 @@ int main(int argc, char *argv[])
 	for (cid=0 ; cid < NUM_OF_CHILDRENS; cid++) {
  105:	c7 84 24 a0 01 00 00 	movl   $0x0,0x1a0(%esp)
  10c:	00 00 00 00 
- 110:	e9 b7 00 00 00       	jmp    1cc <main+0x142>
+ 110:	e9 ba 00 00 00       	jmp    1cf <main+0x145>
 		fork_id = fork();
  115:	e8 ba 07 00 00       	call   8d4 <fork>
  11a:	89 84 24 74 01 00 00 	mov    %eax,0x174(%esp)
 		if (fork_id == 0) {   // child section
  121:	83 bc 24 74 01 00 00 	cmpl   $0x0,0x174(%esp)
  128:	00 
- 129:	75 77                	jne    1a2 <main+0x118>
+ 129:	75 7a                	jne    1a5 <main+0x11b>
 			if ( cid % 2 == 0) {
  12b:	8b 84 24 a0 01 00 00 	mov    0x1a0(%esp),%eax
  132:	83 e0 01             	and    $0x1,%eax
  135:	85 c0                	test   %eax,%eax
  137:	75 07                	jne    140 <main+0xb6>
-				waist_time_function();
- 139:	e8 c2 fe ff ff       	call   0 <waist_time_function>
+				waste_time_function();
+ 139:	e8 c2 fe ff ff       	call   0 <waste_time_function>
  13e:	eb 1f                	jmp    15f <main+0xd5>
 			} else
 				printf(2,"cid <%d> is Activating I/O System Call\n",cid);
@@ -194,390 +194,387 @@ int main(int argc, char *argv[])
  186:	e8 d8 08 00 00       	call   a63 <printf>
 		if (fork_id == 0) {   // child section
 			if ( cid % 2 == 0) {
-				waist_time_function();
+				waste_time_function();
 			} else
 				printf(2,"cid <%d> is Activating I/O System Call\n",cid);
 			for (i = 0 ; i < NUM_OF_CHILD_LOOPS ; i++) {
  18b:	83 84 24 ac 01 00 00 	addl   $0x1,0x1ac(%esp)
  192:	01 
- 193:	83 bc 24 ac 01 00 00 	cmpl   $0x9,0x1ac(%esp)
- 19a:	09 
- 19b:	7e cf                	jle    16c <main+0xe2>
+ 193:	81 bc 24 ac 01 00 00 	cmpl   $0x1f3,0x1ac(%esp)
+ 19a:	f3 01 00 00 
+ 19e:	7e cc                	jle    16c <main+0xe2>
 				printf(2,"cid <%d>\n",cid);
 			}
 			exit();			// end of child section
- 19d:	e8 3a 07 00 00       	call   8dc <exit>
+ 1a0:	e8 37 07 00 00       	call   8dc <exit>
 		} else 				// father section starts here
 			c_array[cid][0] = fork_id;		// position in array is by CID
- 1a2:	8b 84 24 a0 01 00 00 	mov    0x1a0(%esp),%eax
- 1a9:	c1 e0 04             	shl    $0x4,%eax
- 1ac:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
- 1b3:	01 d0                	add    %edx,%eax
- 1b5:	8d 90 78 fe ff ff    	lea    -0x188(%eax),%edx
- 1bb:	8b 84 24 74 01 00 00 	mov    0x174(%esp),%eax
- 1c2:	89 02                	mov    %eax,(%edx)
+ 1a5:	8b 84 24 a0 01 00 00 	mov    0x1a0(%esp),%eax
+ 1ac:	c1 e0 04             	shl    $0x4,%eax
+ 1af:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
+ 1b6:	01 d0                	add    %edx,%eax
+ 1b8:	8d 90 78 fe ff ff    	lea    -0x188(%eax),%edx
+ 1be:	8b 84 24 74 01 00 00 	mov    0x174(%esp),%eax
+ 1c5:	89 02                	mov    %eax,(%edx)
 	int fork_id = 1;
 	int c_array[NUM_OF_CHILDRENS][4];
 	for (i=0 ; i < NUM_OF_CHILDRENS ; i++)	// init array
 		for (j=0 ; j < 4 ; j++)
 			c_array[i][j] = 0;
 	for (cid=0 ; cid < NUM_OF_CHILDRENS; cid++) {
- 1c4:	83 84 24 a0 01 00 00 	addl   $0x1,0x1a0(%esp)
- 1cb:	01 
- 1cc:	83 bc 24 a0 01 00 00 	cmpl   $0x13,0x1a0(%esp)
- 1d3:	13 
- 1d4:	0f 8e 3b ff ff ff    	jle    115 <main+0x8b>
+ 1c7:	83 84 24 a0 01 00 00 	addl   $0x1,0x1a0(%esp)
+ 1ce:	01 
+ 1cf:	83 bc 24 a0 01 00 00 	cmpl   $0x13,0x1a0(%esp)
+ 1d6:	13 
+ 1d7:	0f 8e 38 ff ff ff    	jle    115 <main+0x8b>
 			exit();			// end of child section
 		} else 				// father section starts here
 			c_array[cid][0] = fork_id;		// position in array is by CID
 	}
 
 	while ((fork_id = wait2(&wTime,&rTime,&ioTime)) > 0) {	// update data for all the childrens
- 1da:	e9 e4 00 00 00       	jmp    2c3 <main+0x239>
+ 1dd:	e9 e4 00 00 00       	jmp    2c6 <main+0x23c>
 		flag = 0;
- 1df:	c7 84 24 90 01 00 00 	movl   $0x0,0x190(%esp)
- 1e6:	00 00 00 00 
+ 1e2:	c7 84 24 90 01 00 00 	movl   $0x0,0x190(%esp)
+ 1e9:	00 00 00 00 
 		for (index = 0 ; index < NUM_OF_CHILDRENS && !flag ; index++) {
- 1ea:	c7 84 24 a4 01 00 00 	movl   $0x0,0x1a4(%esp)
- 1f1:	00 00 00 00 
- 1f5:	e9 b1 00 00 00       	jmp    2ab <main+0x221>
+ 1ed:	c7 84 24 a4 01 00 00 	movl   $0x0,0x1a4(%esp)
+ 1f4:	00 00 00 00 
+ 1f8:	e9 b1 00 00 00       	jmp    2ae <main+0x224>
 			if (c_array[index][0] == fork_id) {
- 1fa:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 201:	c1 e0 04             	shl    $0x4,%eax
- 204:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
- 20b:	01 c8                	add    %ecx,%eax
- 20d:	2d 88 01 00 00       	sub    $0x188,%eax
- 212:	8b 00                	mov    (%eax),%eax
- 214:	3b 84 24 74 01 00 00 	cmp    0x174(%esp),%eax
- 21b:	0f 85 82 00 00 00    	jne    2a3 <main+0x219>
+ 1fd:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 204:	c1 e0 04             	shl    $0x4,%eax
+ 207:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
+ 20e:	01 c8                	add    %ecx,%eax
+ 210:	2d 88 01 00 00       	sub    $0x188,%eax
+ 215:	8b 00                	mov    (%eax),%eax
+ 217:	3b 84 24 74 01 00 00 	cmp    0x174(%esp),%eax
+ 21e:	0f 85 82 00 00 00    	jne    2a6 <main+0x21c>
 				c_array[index][1] = wTime;	// waiting time
- 221:	8b 84 24 70 01 00 00 	mov    0x170(%esp),%eax
- 228:	8b 94 24 a4 01 00 00 	mov    0x1a4(%esp),%edx
- 22f:	c1 e2 04             	shl    $0x4,%edx
- 232:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 239:	01 f2                	add    %esi,%edx
- 23b:	81 ea 84 01 00 00    	sub    $0x184,%edx
- 241:	89 02                	mov    %eax,(%edx)
+ 224:	8b 84 24 70 01 00 00 	mov    0x170(%esp),%eax
+ 22b:	8b 94 24 a4 01 00 00 	mov    0x1a4(%esp),%edx
+ 232:	c1 e2 04             	shl    $0x4,%edx
+ 235:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 23c:	01 f2                	add    %esi,%edx
+ 23e:	81 ea 84 01 00 00    	sub    $0x184,%edx
+ 244:	89 02                	mov    %eax,(%edx)
 				c_array[index][2] = rTime;	// run time
- 243:	8b 84 24 6c 01 00 00 	mov    0x16c(%esp),%eax
- 24a:	8b 94 24 a4 01 00 00 	mov    0x1a4(%esp),%edx
- 251:	c1 e2 04             	shl    $0x4,%edx
- 254:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
- 25b:	01 ca                	add    %ecx,%edx
- 25d:	81 ea 80 01 00 00    	sub    $0x180,%edx
- 263:	89 02                	mov    %eax,(%edx)
+ 246:	8b 84 24 6c 01 00 00 	mov    0x16c(%esp),%eax
+ 24d:	8b 94 24 a4 01 00 00 	mov    0x1a4(%esp),%edx
+ 254:	c1 e2 04             	shl    $0x4,%edx
+ 257:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
+ 25e:	01 ca                	add    %ecx,%edx
+ 260:	81 ea 80 01 00 00    	sub    $0x180,%edx
+ 266:	89 02                	mov    %eax,(%edx)
 				c_array[index][3] = wTime+wTime+rTime; // turnaround time -> end time - creation time
- 265:	8b 94 24 70 01 00 00 	mov    0x170(%esp),%edx
- 26c:	8b 84 24 70 01 00 00 	mov    0x170(%esp),%eax
- 273:	01 c2                	add    %eax,%edx
- 275:	8b 84 24 6c 01 00 00 	mov    0x16c(%esp),%eax
- 27c:	01 c2                	add    %eax,%edx
- 27e:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 285:	c1 e0 04             	shl    $0x4,%eax
- 288:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 28f:	01 f0                	add    %esi,%eax
- 291:	2d 7c 01 00 00       	sub    $0x17c,%eax
- 296:	89 10                	mov    %edx,(%eax)
+ 268:	8b 94 24 70 01 00 00 	mov    0x170(%esp),%edx
+ 26f:	8b 84 24 70 01 00 00 	mov    0x170(%esp),%eax
+ 276:	01 c2                	add    %eax,%edx
+ 278:	8b 84 24 6c 01 00 00 	mov    0x16c(%esp),%eax
+ 27f:	01 c2                	add    %eax,%edx
+ 281:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 288:	c1 e0 04             	shl    $0x4,%eax
+ 28b:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 292:	01 f0                	add    %esi,%eax
+ 294:	2d 7c 01 00 00       	sub    $0x17c,%eax
+ 299:	89 10                	mov    %edx,(%eax)
 				flag = 1;
- 298:	c7 84 24 90 01 00 00 	movl   $0x1,0x190(%esp)
- 29f:	01 00 00 00 
+ 29b:	c7 84 24 90 01 00 00 	movl   $0x1,0x190(%esp)
+ 2a2:	01 00 00 00 
 			c_array[cid][0] = fork_id;		// position in array is by CID
 	}
 
 	while ((fork_id = wait2(&wTime,&rTime,&ioTime)) > 0) {	// update data for all the childrens
 		flag = 0;
 		for (index = 0 ; index < NUM_OF_CHILDRENS && !flag ; index++) {
- 2a3:	83 84 24 a4 01 00 00 	addl   $0x1,0x1a4(%esp)
- 2aa:	01 
- 2ab:	83 bc 24 a4 01 00 00 	cmpl   $0x13,0x1a4(%esp)
- 2b2:	13 
- 2b3:	7f 0e                	jg     2c3 <main+0x239>
- 2b5:	83 bc 24 90 01 00 00 	cmpl   $0x0,0x190(%esp)
- 2bc:	00 
- 2bd:	0f 84 37 ff ff ff    	je     1fa <main+0x170>
+ 2a6:	83 84 24 a4 01 00 00 	addl   $0x1,0x1a4(%esp)
+ 2ad:	01 
+ 2ae:	83 bc 24 a4 01 00 00 	cmpl   $0x13,0x1a4(%esp)
+ 2b5:	13 
+ 2b6:	7f 0e                	jg     2c6 <main+0x23c>
+ 2b8:	83 bc 24 90 01 00 00 	cmpl   $0x0,0x190(%esp)
+ 2bf:	00 
+ 2c0:	0f 84 37 ff ff ff    	je     1fd <main+0x173>
 			exit();			// end of child section
 		} else 				// father section starts here
 			c_array[cid][0] = fork_id;		// position in array is by CID
 	}
 
 	while ((fork_id = wait2(&wTime,&rTime,&ioTime)) > 0) {	// update data for all the childrens
- 2c3:	8d 84 24 68 01 00 00 	lea    0x168(%esp),%eax
- 2ca:	89 44 24 08          	mov    %eax,0x8(%esp)
- 2ce:	8d 84 24 6c 01 00 00 	lea    0x16c(%esp),%eax
- 2d5:	89 44 24 04          	mov    %eax,0x4(%esp)
- 2d9:	8d 84 24 70 01 00 00 	lea    0x170(%esp),%eax
- 2e0:	89 04 24             	mov    %eax,(%esp)
- 2e3:	e8 04 06 00 00       	call   8ec <wait2>
- 2e8:	89 84 24 74 01 00 00 	mov    %eax,0x174(%esp)
- 2ef:	83 bc 24 74 01 00 00 	cmpl   $0x0,0x174(%esp)
- 2f6:	00 
- 2f7:	0f 8f e2 fe ff ff    	jg     1df <main+0x155>
+ 2c6:	8d 84 24 68 01 00 00 	lea    0x168(%esp),%eax
+ 2cd:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 2d1:	8d 84 24 6c 01 00 00 	lea    0x16c(%esp),%eax
+ 2d8:	89 44 24 04          	mov    %eax,0x4(%esp)
+ 2dc:	8d 84 24 70 01 00 00 	lea    0x170(%esp),%eax
+ 2e3:	89 04 24             	mov    %eax,(%esp)
+ 2e6:	e8 01 06 00 00       	call   8ec <wait2>
+ 2eb:	89 84 24 74 01 00 00 	mov    %eax,0x174(%esp)
+ 2f2:	83 bc 24 74 01 00 00 	cmpl   $0x0,0x174(%esp)
+ 2f9:	00 
+ 2fa:	0f 8f e2 fe ff ff    	jg     1e2 <main+0x158>
 				flag = 1;
 			}
 		}
 	}
 
 	for (index = 0 ; index < NUM_OF_CHILDRENS ; index++) {
- 2fd:	c7 84 24 a4 01 00 00 	movl   $0x0,0x1a4(%esp)
- 304:	00 00 00 00 
- 308:	e9 41 01 00 00       	jmp    44e <main+0x3c4>
+ 300:	c7 84 24 a4 01 00 00 	movl   $0x0,0x1a4(%esp)
+ 307:	00 00 00 00 
+ 30b:	e9 41 01 00 00       	jmp    451 <main+0x3c7>
 		avg_wTime += c_array[index][1];
- 30d:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 314:	c1 e0 04             	shl    $0x4,%eax
- 317:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
- 31e:	01 d0                	add    %edx,%eax
- 320:	2d 84 01 00 00       	sub    $0x184,%eax
- 325:	8b 00                	mov    (%eax),%eax
- 327:	01 84 24 9c 01 00 00 	add    %eax,0x19c(%esp)
+ 310:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 317:	c1 e0 04             	shl    $0x4,%eax
+ 31a:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
+ 321:	01 d0                	add    %edx,%eax
+ 323:	2d 84 01 00 00       	sub    $0x184,%eax
+ 328:	8b 00                	mov    (%eax),%eax
+ 32a:	01 84 24 9c 01 00 00 	add    %eax,0x19c(%esp)
 		avg_rTime += c_array[index][2];
- 32e:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 335:	c1 e0 04             	shl    $0x4,%eax
- 338:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
- 33f:	01 c8                	add    %ecx,%eax
- 341:	2d 80 01 00 00       	sub    $0x180,%eax
- 346:	8b 00                	mov    (%eax),%eax
- 348:	01 84 24 98 01 00 00 	add    %eax,0x198(%esp)
+ 331:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 338:	c1 e0 04             	shl    $0x4,%eax
+ 33b:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
+ 342:	01 c8                	add    %ecx,%eax
+ 344:	2d 80 01 00 00       	sub    $0x180,%eax
+ 349:	8b 00                	mov    (%eax),%eax
+ 34b:	01 84 24 98 01 00 00 	add    %eax,0x198(%esp)
 		avg_turnAround += c_array[index][3];
- 34f:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 356:	c1 e0 04             	shl    $0x4,%eax
- 359:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 360:	01 f0                	add    %esi,%eax
- 362:	2d 7c 01 00 00       	sub    $0x17c,%eax
- 367:	8b 00                	mov    (%eax),%eax
- 369:	01 84 24 94 01 00 00 	add    %eax,0x194(%esp)
+ 352:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 359:	c1 e0 04             	shl    $0x4,%eax
+ 35c:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 363:	01 f0                	add    %esi,%eax
+ 365:	2d 7c 01 00 00       	sub    $0x17c,%eax
+ 36a:	8b 00                	mov    (%eax),%eax
+ 36c:	01 84 24 94 01 00 00 	add    %eax,0x194(%esp)
 		if (index % 2 == 0) {
- 370:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 377:	83 e0 01             	and    $0x1,%eax
- 37a:	85 c0                	test   %eax,%eax
- 37c:	75 65                	jne    3e3 <main+0x359>
+ 373:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 37a:	83 e0 01             	and    $0x1,%eax
+ 37d:	85 c0                	test   %eax,%eax
+ 37f:	75 65                	jne    3e6 <main+0x35c>
 			low_avg_wTime += c_array[index][1];
- 37e:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 385:	c1 e0 04             	shl    $0x4,%eax
- 388:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
- 38f:	01 d0                	add    %edx,%eax
- 391:	2d 84 01 00 00       	sub    $0x184,%eax
- 396:	8b 00                	mov    (%eax),%eax
- 398:	01 84 24 8c 01 00 00 	add    %eax,0x18c(%esp)
+ 381:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 388:	c1 e0 04             	shl    $0x4,%eax
+ 38b:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
+ 392:	01 d0                	add    %edx,%eax
+ 394:	2d 84 01 00 00       	sub    $0x184,%eax
+ 399:	8b 00                	mov    (%eax),%eax
+ 39b:	01 84 24 8c 01 00 00 	add    %eax,0x18c(%esp)
 			low_avg_rTime += c_array[index][2];
- 39f:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 3a6:	c1 e0 04             	shl    $0x4,%eax
- 3a9:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
- 3b0:	01 c8                	add    %ecx,%eax
- 3b2:	2d 80 01 00 00       	sub    $0x180,%eax
- 3b7:	8b 00                	mov    (%eax),%eax
- 3b9:	01 84 24 88 01 00 00 	add    %eax,0x188(%esp)
+ 3a2:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 3a9:	c1 e0 04             	shl    $0x4,%eax
+ 3ac:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
+ 3b3:	01 c8                	add    %ecx,%eax
+ 3b5:	2d 80 01 00 00       	sub    $0x180,%eax
+ 3ba:	8b 00                	mov    (%eax),%eax
+ 3bc:	01 84 24 88 01 00 00 	add    %eax,0x188(%esp)
 			low_avg_turnAround += c_array[index][3];
- 3c0:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 3c7:	c1 e0 04             	shl    $0x4,%eax
- 3ca:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 3d1:	01 f0                	add    %esi,%eax
- 3d3:	2d 7c 01 00 00       	sub    $0x17c,%eax
- 3d8:	8b 00                	mov    (%eax),%eax
- 3da:	01 84 24 84 01 00 00 	add    %eax,0x184(%esp)
- 3e1:	eb 63                	jmp    446 <main+0x3bc>
+ 3c3:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 3ca:	c1 e0 04             	shl    $0x4,%eax
+ 3cd:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 3d4:	01 f0                	add    %esi,%eax
+ 3d6:	2d 7c 01 00 00       	sub    $0x17c,%eax
+ 3db:	8b 00                	mov    (%eax),%eax
+ 3dd:	01 84 24 84 01 00 00 	add    %eax,0x184(%esp)
+ 3e4:	eb 63                	jmp    449 <main+0x3bf>
 		} else {
 			high_avg_wTime += c_array[index][1];
- 3e3:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 3ea:	c1 e0 04             	shl    $0x4,%eax
- 3ed:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
- 3f4:	01 d0                	add    %edx,%eax
- 3f6:	2d 84 01 00 00       	sub    $0x184,%eax
- 3fb:	8b 00                	mov    (%eax),%eax
- 3fd:	01 84 24 80 01 00 00 	add    %eax,0x180(%esp)
+ 3e6:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 3ed:	c1 e0 04             	shl    $0x4,%eax
+ 3f0:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
+ 3f7:	01 d0                	add    %edx,%eax
+ 3f9:	2d 84 01 00 00       	sub    $0x184,%eax
+ 3fe:	8b 00                	mov    (%eax),%eax
+ 400:	01 84 24 80 01 00 00 	add    %eax,0x180(%esp)
 			high_avg_rTime += c_array[index][2];
- 404:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 40b:	c1 e0 04             	shl    $0x4,%eax
- 40e:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
- 415:	01 c8                	add    %ecx,%eax
- 417:	2d 80 01 00 00       	sub    $0x180,%eax
- 41c:	8b 00                	mov    (%eax),%eax
- 41e:	01 84 24 7c 01 00 00 	add    %eax,0x17c(%esp)
+ 407:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 40e:	c1 e0 04             	shl    $0x4,%eax
+ 411:	8d 8c 24 b0 01 00 00 	lea    0x1b0(%esp),%ecx
+ 418:	01 c8                	add    %ecx,%eax
+ 41a:	2d 80 01 00 00       	sub    $0x180,%eax
+ 41f:	8b 00                	mov    (%eax),%eax
+ 421:	01 84 24 7c 01 00 00 	add    %eax,0x17c(%esp)
 			high_avg_turnAround += c_array[index][3];
- 425:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 42c:	c1 e0 04             	shl    $0x4,%eax
- 42f:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 436:	01 f0                	add    %esi,%eax
- 438:	2d 7c 01 00 00       	sub    $0x17c,%eax
- 43d:	8b 00                	mov    (%eax),%eax
- 43f:	01 84 24 78 01 00 00 	add    %eax,0x178(%esp)
+ 428:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 42f:	c1 e0 04             	shl    $0x4,%eax
+ 432:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 439:	01 f0                	add    %esi,%eax
+ 43b:	2d 7c 01 00 00       	sub    $0x17c,%eax
+ 440:	8b 00                	mov    (%eax),%eax
+ 442:	01 84 24 78 01 00 00 	add    %eax,0x178(%esp)
 				flag = 1;
 			}
 		}
 	}
 
 	for (index = 0 ; index < NUM_OF_CHILDRENS ; index++) {
- 446:	83 84 24 a4 01 00 00 	addl   $0x1,0x1a4(%esp)
- 44d:	01 
- 44e:	83 bc 24 a4 01 00 00 	cmpl   $0x13,0x1a4(%esp)
- 455:	13 
- 456:	0f 8e b1 fe ff ff    	jle    30d <main+0x283>
+ 449:	83 84 24 a4 01 00 00 	addl   $0x1,0x1a4(%esp)
+ 450:	01 
+ 451:	83 bc 24 a4 01 00 00 	cmpl   $0x13,0x1a4(%esp)
+ 458:	13 
+ 459:	0f 8e b1 fe ff ff    	jle    310 <main+0x286>
 			high_avg_rTime += c_array[index][2];
 			high_avg_turnAround += c_array[index][3];
 		}
 	}
 
 	printf(2,"Average waiting time <%d> , Average run time <%d> , Average turnaround time <%d>\n",avg_wTime/NUM_OF_CHILDRENS,avg_rTime/NUM_OF_CHILDRENS,avg_turnAround/NUM_OF_CHILDRENS);
- 45c:	8b 8c 24 94 01 00 00 	mov    0x194(%esp),%ecx
- 463:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 468:	89 c8                	mov    %ecx,%eax
- 46a:	f7 ea                	imul   %edx
- 46c:	c1 fa 03             	sar    $0x3,%edx
- 46f:	89 c8                	mov    %ecx,%eax
- 471:	c1 f8 1f             	sar    $0x1f,%eax
- 474:	89 d6                	mov    %edx,%esi
- 476:	29 c6                	sub    %eax,%esi
- 478:	8b 8c 24 98 01 00 00 	mov    0x198(%esp),%ecx
- 47f:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 484:	89 c8                	mov    %ecx,%eax
- 486:	f7 ea                	imul   %edx
- 488:	c1 fa 03             	sar    $0x3,%edx
- 48b:	89 c8                	mov    %ecx,%eax
- 48d:	c1 f8 1f             	sar    $0x1f,%eax
- 490:	89 d3                	mov    %edx,%ebx
- 492:	29 c3                	sub    %eax,%ebx
- 494:	8b 8c 24 9c 01 00 00 	mov    0x19c(%esp),%ecx
- 49b:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 4a0:	89 c8                	mov    %ecx,%eax
- 4a2:	f7 ea                	imul   %edx
- 4a4:	c1 fa 03             	sar    $0x3,%edx
- 4a7:	89 c8                	mov    %ecx,%eax
- 4a9:	c1 f8 1f             	sar    $0x1f,%eax
- 4ac:	89 d1                	mov    %edx,%ecx
- 4ae:	29 c1                	sub    %eax,%ecx
- 4b0:	89 c8                	mov    %ecx,%eax
- 4b2:	89 74 24 10          	mov    %esi,0x10(%esp)
- 4b6:	89 5c 24 0c          	mov    %ebx,0xc(%esp)
- 4ba:	89 44 24 08          	mov    %eax,0x8(%esp)
- 4be:	c7 44 24 04 5c 0e 00 	movl   $0xe5c,0x4(%esp)
- 4c5:	00 
- 4c6:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
- 4cd:	e8 91 05 00 00       	call   a63 <printf>
+ 45f:	8b 8c 24 94 01 00 00 	mov    0x194(%esp),%ecx
+ 466:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 46b:	89 c8                	mov    %ecx,%eax
+ 46d:	f7 ea                	imul   %edx
+ 46f:	c1 fa 03             	sar    $0x3,%edx
+ 472:	89 c8                	mov    %ecx,%eax
+ 474:	c1 f8 1f             	sar    $0x1f,%eax
+ 477:	89 d6                	mov    %edx,%esi
+ 479:	29 c6                	sub    %eax,%esi
+ 47b:	8b 8c 24 98 01 00 00 	mov    0x198(%esp),%ecx
+ 482:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 487:	89 c8                	mov    %ecx,%eax
+ 489:	f7 ea                	imul   %edx
+ 48b:	c1 fa 03             	sar    $0x3,%edx
+ 48e:	89 c8                	mov    %ecx,%eax
+ 490:	c1 f8 1f             	sar    $0x1f,%eax
+ 493:	89 d3                	mov    %edx,%ebx
+ 495:	29 c3                	sub    %eax,%ebx
+ 497:	8b 8c 24 9c 01 00 00 	mov    0x19c(%esp),%ecx
+ 49e:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 4a3:	89 c8                	mov    %ecx,%eax
+ 4a5:	f7 ea                	imul   %edx
+ 4a7:	c1 fa 03             	sar    $0x3,%edx
+ 4aa:	89 c8                	mov    %ecx,%eax
+ 4ac:	c1 f8 1f             	sar    $0x1f,%eax
+ 4af:	89 d1                	mov    %edx,%ecx
+ 4b1:	29 c1                	sub    %eax,%ecx
+ 4b3:	89 c8                	mov    %ecx,%eax
+ 4b5:	89 74 24 10          	mov    %esi,0x10(%esp)
+ 4b9:	89 5c 24 0c          	mov    %ebx,0xc(%esp)
+ 4bd:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 4c1:	c7 44 24 04 5c 0e 00 	movl   $0xe5c,0x4(%esp)
+ 4c8:	00 
+ 4c9:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
+ 4d0:	e8 8e 05 00 00       	call   a63 <printf>
 	printf(2,"Average Low Priority Queue: waiting time <%d> , run time <%d> , turnaround time <%d>\n",low_avg_wTime/(NUM_OF_CHILDRENS/2),low_avg_rTime/(NUM_OF_CHILDRENS/2),low_avg_turnAround/(NUM_OF_CHILDRENS/2));
- 4d2:	8b 8c 24 84 01 00 00 	mov    0x184(%esp),%ecx
- 4d9:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 4de:	89 c8                	mov    %ecx,%eax
- 4e0:	f7 ea                	imul   %edx
- 4e2:	c1 fa 02             	sar    $0x2,%edx
- 4e5:	89 c8                	mov    %ecx,%eax
- 4e7:	c1 f8 1f             	sar    $0x1f,%eax
- 4ea:	89 d6                	mov    %edx,%esi
- 4ec:	29 c6                	sub    %eax,%esi
- 4ee:	8b 8c 24 88 01 00 00 	mov    0x188(%esp),%ecx
- 4f5:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 4fa:	89 c8                	mov    %ecx,%eax
- 4fc:	f7 ea                	imul   %edx
- 4fe:	c1 fa 02             	sar    $0x2,%edx
- 501:	89 c8                	mov    %ecx,%eax
- 503:	c1 f8 1f             	sar    $0x1f,%eax
- 506:	89 d3                	mov    %edx,%ebx
- 508:	29 c3                	sub    %eax,%ebx
- 50a:	8b 8c 24 8c 01 00 00 	mov    0x18c(%esp),%ecx
- 511:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 516:	89 c8                	mov    %ecx,%eax
- 518:	f7 ea                	imul   %edx
- 51a:	c1 fa 02             	sar    $0x2,%edx
- 51d:	89 c8                	mov    %ecx,%eax
- 51f:	c1 f8 1f             	sar    $0x1f,%eax
- 522:	89 d1                	mov    %edx,%ecx
- 524:	29 c1                	sub    %eax,%ecx
- 526:	89 c8                	mov    %ecx,%eax
- 528:	89 74 24 10          	mov    %esi,0x10(%esp)
- 52c:	89 5c 24 0c          	mov    %ebx,0xc(%esp)
- 530:	89 44 24 08          	mov    %eax,0x8(%esp)
- 534:	c7 44 24 04 b0 0e 00 	movl   $0xeb0,0x4(%esp)
- 53b:	00 
- 53c:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
- 543:	e8 1b 05 00 00       	call   a63 <printf>
+ 4d5:	8b 8c 24 84 01 00 00 	mov    0x184(%esp),%ecx
+ 4dc:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 4e1:	89 c8                	mov    %ecx,%eax
+ 4e3:	f7 ea                	imul   %edx
+ 4e5:	c1 fa 02             	sar    $0x2,%edx
+ 4e8:	89 c8                	mov    %ecx,%eax
+ 4ea:	c1 f8 1f             	sar    $0x1f,%eax
+ 4ed:	89 d6                	mov    %edx,%esi
+ 4ef:	29 c6                	sub    %eax,%esi
+ 4f1:	8b 8c 24 88 01 00 00 	mov    0x188(%esp),%ecx
+ 4f8:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 4fd:	89 c8                	mov    %ecx,%eax
+ 4ff:	f7 ea                	imul   %edx
+ 501:	c1 fa 02             	sar    $0x2,%edx
+ 504:	89 c8                	mov    %ecx,%eax
+ 506:	c1 f8 1f             	sar    $0x1f,%eax
+ 509:	89 d3                	mov    %edx,%ebx
+ 50b:	29 c3                	sub    %eax,%ebx
+ 50d:	8b 8c 24 8c 01 00 00 	mov    0x18c(%esp),%ecx
+ 514:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 519:	89 c8                	mov    %ecx,%eax
+ 51b:	f7 ea                	imul   %edx
+ 51d:	c1 fa 02             	sar    $0x2,%edx
+ 520:	89 c8                	mov    %ecx,%eax
+ 522:	c1 f8 1f             	sar    $0x1f,%eax
+ 525:	89 d1                	mov    %edx,%ecx
+ 527:	29 c1                	sub    %eax,%ecx
+ 529:	89 c8                	mov    %ecx,%eax
+ 52b:	89 74 24 10          	mov    %esi,0x10(%esp)
+ 52f:	89 5c 24 0c          	mov    %ebx,0xc(%esp)
+ 533:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 537:	c7 44 24 04 b0 0e 00 	movl   $0xeb0,0x4(%esp)
+ 53e:	00 
+ 53f:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
+ 546:	e8 18 05 00 00       	call   a63 <printf>
 	printf(2,"Average High Priority Queue: waiting time <%d> , run time <%d> , turnaround time <%d>\n",high_avg_wTime/(NUM_OF_CHILDRENS/2),high_avg_rTime/(NUM_OF_CHILDRENS/2),high_avg_turnAround/(NUM_OF_CHILDRENS/2));
- 548:	8b 8c 24 78 01 00 00 	mov    0x178(%esp),%ecx
- 54f:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 554:	89 c8                	mov    %ecx,%eax
- 556:	f7 ea                	imul   %edx
- 558:	c1 fa 02             	sar    $0x2,%edx
- 55b:	89 c8                	mov    %ecx,%eax
- 55d:	c1 f8 1f             	sar    $0x1f,%eax
- 560:	89 d6                	mov    %edx,%esi
- 562:	29 c6                	sub    %eax,%esi
- 564:	8b 8c 24 7c 01 00 00 	mov    0x17c(%esp),%ecx
- 56b:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 570:	89 c8                	mov    %ecx,%eax
- 572:	f7 ea                	imul   %edx
- 574:	c1 fa 02             	sar    $0x2,%edx
- 577:	89 c8                	mov    %ecx,%eax
- 579:	c1 f8 1f             	sar    $0x1f,%eax
- 57c:	89 d3                	mov    %edx,%ebx
- 57e:	29 c3                	sub    %eax,%ebx
- 580:	8b 8c 24 80 01 00 00 	mov    0x180(%esp),%ecx
- 587:	ba 67 66 66 66       	mov    $0x66666667,%edx
- 58c:	89 c8                	mov    %ecx,%eax
- 58e:	f7 ea                	imul   %edx
- 590:	c1 fa 02             	sar    $0x2,%edx
- 593:	89 c8                	mov    %ecx,%eax
- 595:	c1 f8 1f             	sar    $0x1f,%eax
- 598:	89 d1                	mov    %edx,%ecx
- 59a:	29 c1                	sub    %eax,%ecx
- 59c:	89 c8                	mov    %ecx,%eax
- 59e:	89 74 24 10          	mov    %esi,0x10(%esp)
- 5a2:	89 5c 24 0c          	mov    %ebx,0xc(%esp)
- 5a6:	89 44 24 08          	mov    %eax,0x8(%esp)
- 5aa:	c7 44 24 04 08 0f 00 	movl   $0xf08,0x4(%esp)
- 5b1:	00 
- 5b2:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
- 5b9:	e8 a5 04 00 00       	call   a63 <printf>
+ 54b:	8b 8c 24 78 01 00 00 	mov    0x178(%esp),%ecx
+ 552:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 557:	89 c8                	mov    %ecx,%eax
+ 559:	f7 ea                	imul   %edx
+ 55b:	c1 fa 02             	sar    $0x2,%edx
+ 55e:	89 c8                	mov    %ecx,%eax
+ 560:	c1 f8 1f             	sar    $0x1f,%eax
+ 563:	89 d6                	mov    %edx,%esi
+ 565:	29 c6                	sub    %eax,%esi
+ 567:	8b 8c 24 7c 01 00 00 	mov    0x17c(%esp),%ecx
+ 56e:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 573:	89 c8                	mov    %ecx,%eax
+ 575:	f7 ea                	imul   %edx
+ 577:	c1 fa 02             	sar    $0x2,%edx
+ 57a:	89 c8                	mov    %ecx,%eax
+ 57c:	c1 f8 1f             	sar    $0x1f,%eax
+ 57f:	89 d3                	mov    %edx,%ebx
+ 581:	29 c3                	sub    %eax,%ebx
+ 583:	8b 8c 24 80 01 00 00 	mov    0x180(%esp),%ecx
+ 58a:	ba 67 66 66 66       	mov    $0x66666667,%edx
+ 58f:	89 c8                	mov    %ecx,%eax
+ 591:	f7 ea                	imul   %edx
+ 593:	c1 fa 02             	sar    $0x2,%edx
+ 596:	89 c8                	mov    %ecx,%eax
+ 598:	c1 f8 1f             	sar    $0x1f,%eax
+ 59b:	89 d1                	mov    %edx,%ecx
+ 59d:	29 c1                	sub    %eax,%ecx
+ 59f:	89 c8                	mov    %ecx,%eax
+ 5a1:	89 74 24 10          	mov    %esi,0x10(%esp)
+ 5a5:	89 5c 24 0c          	mov    %ebx,0xc(%esp)
+ 5a9:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 5ad:	c7 44 24 04 08 0f 00 	movl   $0xf08,0x4(%esp)
+ 5b4:	00 
+ 5b5:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
+ 5bc:	e8 a2 04 00 00       	call   a63 <printf>
 	for (index = 0 ; index < NUM_OF_CHILDRENS ; index++)
- 5be:	c7 84 24 a4 01 00 00 	movl   $0x0,0x1a4(%esp)
- 5c5:	00 00 00 00 
- 5c9:	e9 94 00 00 00       	jmp    662 <main+0x5d8>
+ 5c1:	c7 84 24 a4 01 00 00 	movl   $0x0,0x1a4(%esp)
+ 5c8:	00 00 00 00 
+ 5cc:	e9 94 00 00 00       	jmp    665 <main+0x5db>
 		printf(2,"Child <%d>: Waiting time %d , Running time %d , Turnaround time %d\n",c_array[index][0],c_array[index][1],c_array[index][2],c_array[index][3]);
- 5ce:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 5d5:	c1 e0 04             	shl    $0x4,%eax
- 5d8:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 5df:	01 f0                	add    %esi,%eax
- 5e1:	2d 7c 01 00 00       	sub    $0x17c,%eax
- 5e6:	8b 18                	mov    (%eax),%ebx
- 5e8:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 5ef:	c1 e0 04             	shl    $0x4,%eax
- 5f2:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
- 5f9:	01 d0                	add    %edx,%eax
- 5fb:	2d 80 01 00 00       	sub    $0x180,%eax
- 600:	8b 08                	mov    (%eax),%ecx
- 602:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 609:	c1 e0 04             	shl    $0x4,%eax
- 60c:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 613:	01 f0                	add    %esi,%eax
- 615:	2d 84 01 00 00       	sub    $0x184,%eax
- 61a:	8b 10                	mov    (%eax),%edx
- 61c:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
- 623:	c1 e0 04             	shl    $0x4,%eax
- 626:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
- 62d:	01 f0                	add    %esi,%eax
- 62f:	2d 88 01 00 00       	sub    $0x188,%eax
- 634:	8b 00                	mov    (%eax),%eax
- 636:	89 5c 24 14          	mov    %ebx,0x14(%esp)
- 63a:	89 4c 24 10          	mov    %ecx,0x10(%esp)
- 63e:	89 54 24 0c          	mov    %edx,0xc(%esp)
- 642:	89 44 24 08          	mov    %eax,0x8(%esp)
- 646:	c7 44 24 04 60 0f 00 	movl   $0xf60,0x4(%esp)
- 64d:	00 
- 64e:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
- 655:	e8 09 04 00 00       	call   a63 <printf>
+ 5d1:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 5d8:	c1 e0 04             	shl    $0x4,%eax
+ 5db:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 5e2:	01 f0                	add    %esi,%eax
+ 5e4:	2d 7c 01 00 00       	sub    $0x17c,%eax
+ 5e9:	8b 18                	mov    (%eax),%ebx
+ 5eb:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 5f2:	c1 e0 04             	shl    $0x4,%eax
+ 5f5:	8d 94 24 b0 01 00 00 	lea    0x1b0(%esp),%edx
+ 5fc:	01 d0                	add    %edx,%eax
+ 5fe:	2d 80 01 00 00       	sub    $0x180,%eax
+ 603:	8b 08                	mov    (%eax),%ecx
+ 605:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 60c:	c1 e0 04             	shl    $0x4,%eax
+ 60f:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 616:	01 f0                	add    %esi,%eax
+ 618:	2d 84 01 00 00       	sub    $0x184,%eax
+ 61d:	8b 10                	mov    (%eax),%edx
+ 61f:	8b 84 24 a4 01 00 00 	mov    0x1a4(%esp),%eax
+ 626:	c1 e0 04             	shl    $0x4,%eax
+ 629:	8d b4 24 b0 01 00 00 	lea    0x1b0(%esp),%esi
+ 630:	01 f0                	add    %esi,%eax
+ 632:	2d 88 01 00 00       	sub    $0x188,%eax
+ 637:	8b 00                	mov    (%eax),%eax
+ 639:	89 5c 24 14          	mov    %ebx,0x14(%esp)
+ 63d:	89 4c 24 10          	mov    %ecx,0x10(%esp)
+ 641:	89 54 24 0c          	mov    %edx,0xc(%esp)
+ 645:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 649:	c7 44 24 04 60 0f 00 	movl   $0xf60,0x4(%esp)
+ 650:	00 
+ 651:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
+ 658:	e8 06 04 00 00       	call   a63 <printf>
 	}
 
 	printf(2,"Average waiting time <%d> , Average run time <%d> , Average turnaround time <%d>\n",avg_wTime/NUM_OF_CHILDRENS,avg_rTime/NUM_OF_CHILDRENS,avg_turnAround/NUM_OF_CHILDRENS);
 	printf(2,"Average Low Priority Queue: waiting time <%d> , run time <%d> , turnaround time <%d>\n",low_avg_wTime/(NUM_OF_CHILDRENS/2),low_avg_rTime/(NUM_OF_CHILDRENS/2),low_avg_turnAround/(NUM_OF_CHILDRENS/2));
 	printf(2,"Average High Priority Queue: waiting time <%d> , run time <%d> , turnaround time <%d>\n",high_avg_wTime/(NUM_OF_CHILDRENS/2),high_avg_rTime/(NUM_OF_CHILDRENS/2),high_avg_turnAround/(NUM_OF_CHILDRENS/2));
 	for (index = 0 ; index < NUM_OF_CHILDRENS ; index++)
- 65a:	83 84 24 a4 01 00 00 	addl   $0x1,0x1a4(%esp)
- 661:	01 
- 662:	83 bc 24 a4 01 00 00 	cmpl   $0x13,0x1a4(%esp)
- 669:	13 
- 66a:	0f 8e 5e ff ff ff    	jle    5ce <main+0x544>
+ 65d:	83 84 24 a4 01 00 00 	addl   $0x1,0x1a4(%esp)
+ 664:	01 
+ 665:	83 bc 24 a4 01 00 00 	cmpl   $0x13,0x1a4(%esp)
+ 66c:	13 
+ 66d:	0f 8e 5e ff ff ff    	jle    5d1 <main+0x547>
 		printf(2,"Child <%d>: Waiting time %d , Running time %d , Turnaround time %d\n",c_array[index][0],c_array[index][1],c_array[index][2],c_array[index][3]);
 	exit();
- 670:	e8 67 02 00 00       	call   8dc <exit>
- 675:	90                   	nop
- 676:	90                   	nop
- 677:	90                   	nop
+ 673:	e8 64 02 00 00       	call   8dc <exit>
 
 00000678 <stosb>:
                "cc");

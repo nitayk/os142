@@ -3,9 +3,9 @@
 #include "user.h"
 
 #define NUM_OF_CHILDRENS 20
-#define NUM_OF_CHILD_LOOPS 10
+#define NUM_OF_CHILD_LOOPS 500
 
-int waist_time_function() {
+int waste_time_function() {
 	int sum = 0;
 	double i,j,k = 0.0;
 	for (i =0 ; i < 1750 ; i++) {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 		fork_id = fork();
 		if (fork_id == 0) {   // child section
 			if ( cid % 2 == 0) {
-				waist_time_function();
+				waste_time_function();
 			} else
 				printf(2,"cid <%d> is Activating I/O System Call\n",cid);
 			for (i = 0 ; i < NUM_OF_CHILD_LOOPS ; i++) {
