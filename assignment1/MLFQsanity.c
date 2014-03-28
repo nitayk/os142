@@ -7,7 +7,7 @@
 
 int waste_time_function() {
 	int sum = 0;
-	double i,j,k = 0.0;
+	int i,j,k = 0;
 	for (i =0 ; i < 1750 ; i++) {
 		for (j = 0 ; j < i ; j++) {
 			for (k = 0 ; k < j ; k++) {
