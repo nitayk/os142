@@ -75,7 +75,8 @@ struct proc {
   int rtime;		       // Process run time
   int sleeptime;	       // rememeber timestamp for sleeping
   int quanta;		       // each process holds its quanta
-  int queuenum;
+  int queuenum;		       // process number in execution queue
+  int priority;                // process priority HIGH/MEDIUM/LOW
 };
 
 void updateProcCounters(void);

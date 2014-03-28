@@ -107,8 +107,20 @@ trap(struct trapframe *tf)
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
   #ifndef _FCFS
-  if(proc && proc->state == RUNNING && proc->quanta % QUANTA == 0 && tf->trapno == T_IRQ0+IRQ_TIMER)
-    yield();
+  if(proc && proc->state == RUNNING && proc->quanta % QUANTA == 0 && tf->trapno == T_IRQ0+IRQ_TIMER){
+    int check = 1;
+    #ifdef _3Q
+    if (proc->priority == LOW)
+      check = 0;
+    #endif
+    if (check){
+      if (proc->priority == HIGH)
+	proc->priority = MEDIUM;
+      else
+	proc->priority = LOW;
+      yield();
+    }
+  }
   #endif
 
   // Check if the process has been killed since we yielded
