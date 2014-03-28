@@ -13878,6 +13878,7 @@ trap(struct trapframe *tf)
 
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
+  #ifndef _FCFS
   if(proc && proc->state == RUNNING && proc->quanta % QUANTA == 0 && tf->trapno == T_IRQ0+IRQ_TIMER)
 801070ef:	65 a1 04 00 00 00    	mov    %gs:0x4,%eax
 801070f5:	85 c0                	test   %eax,%eax
@@ -13908,6 +13909,7 @@ trap(struct trapframe *tf)
 8010713d:	75 05                	jne    80107144 <trap+0x2cd>
     yield();
 8010713f:	e8 2e e0 ff ff       	call   80105172 <yield>
+  #endif
 
   // Check if the process has been killed since we yielded
   if(proc && proc->killed && (tf->cs&3) == DPL_USER)
@@ -13934,7 +13936,7 @@ trap(struct trapframe *tf)
       exit();
     return;
 80107174:	90                   	nop
-    yield();
+  #endif
 
   // Check if the process has been killed since we yielded
   if(proc && proc->killed && (tf->cs&3) == DPL_USER)
