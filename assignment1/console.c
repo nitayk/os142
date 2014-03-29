@@ -131,52 +131,40 @@ panic(char *s)
 #define KEY_UP 0xE2
 #define KEY_DN 0xE3
 
-
 static uint arrows_counter = 0; // counter from right to left    3 2 1 0 <-
-static uint e_pos = 0;
-
 static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
-static void
-cgaputc(int c)
-{
-  int pos;
-  
-  // Cursor position: col + 80*row.
-  outb(CRTPORT, 14);
-  pos = inb(CRTPORT+1) << 8;
-  outb(CRTPORT, 15);
-  pos |= inb(CRTPORT+1);
+static void cgaputc(int c) {
+	int pos;
+	// Cursor position: col + 80*row.
+	outb(CRTPORT, 14);
+	pos = inb(CRTPORT+1) << 8;
+	outb(CRTPORT, 15);
+	pos |= inb(CRTPORT+1);
+	if(c == '\n')
+		pos += 80 - pos%80;
+	else if (c == BACKSPACE || c == KEY_LF) {
+		if (pos > 0) { pos--; }
+	} else if (c == KEY_RT) {
+		if (pos > 0) { pos++; }
+	} else
+		crt[pos++] = (c & 0xff) | 0x0700;  // black on white
 
-  if(c == '\n')
-    pos += 80 - pos%80;
-  else if(c == BACKSPACE){
-    if(pos > 0) --pos;
-  }
-  else if(c == KEY_LF) { 	// left & right arrows on Qemu console
-       if(pos > 0) --pos;
-  } else if(c == KEY_RT) {
-      if(pos > 0)  ++pos;
-   } else
-    crt[pos++] = (c&0xff) | 0x0700;  // black on white
-  
-  if((pos/80) >= 24){  // Scroll up.
-    memmove(crt, crt+80, sizeof(crt[0])*23*80);
-    pos -= 80;
-    memset(crt+pos, 0, sizeof(crt[0])*(24*80 - pos));
-  }
-  
-  outb(CRTPORT, 14);
-  outb(CRTPORT+1, pos>>8);
-  outb(CRTPORT, 15);
-  outb(CRTPORT+1, pos);
-  if(c == BACKSPACE)
-      crt[pos] = ' ' | 0x0700;
+	if((pos/80) >= 24){  // Scroll up.
+		memmove(crt, crt+80, sizeof(crt[0])*23*80);
+		pos -= 80;
+		memset(crt+pos, 0, sizeof(crt[0])*(24*80 - pos));
+	}
+
+	outb(CRTPORT, 14);
+	outb(CRTPORT+1, pos>>8);
+	outb(CRTPORT, 15);
+	outb(CRTPORT+1, pos);
+	if(c == BACKSPACE)
+		crt[pos] = ' ' | 0x0700;
 }
 
-void
-consputc(int c)
-{
+void consputc(int c) {
   if(panicked){
     cli();
     for(;;)
@@ -212,145 +200,140 @@ struct history_data history = {0,0,0,0};
 
 #define C(x)  ((x)-'@')  // Control-x
 
-void
-consoleintr(int (*getc)(void))
-{
+void consoleintr(int (*getc)(void)) {
   int c,i;
-
+  uint e_pos;
   acquire(&input.lock);
   while((c = getc()) >= 0){
-    switch(c){
-    case C('P'):  // Process listing.
-      procdump();
+    switch(c) {
+		case C('P'):  // Process listing.
+		  procdump();
+		  break;
+
+		case C('U'):  // Kill line.
+		  while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n'){
+			input.e--;
+			consputc(BACKSPACE);
+		  }
+		  break;
+
+		case C('H'): case '\x7f':  // Backspace
+		  if(input.e-arrows_counter != input.w){
+			if (arrows_counter == 0)
+				input.e--;
+			else
+				input.e -= arrows_counter+1;
+			for(i = 0; i < arrows_counter; i++) {		// when in the middle of a word, shifting
+			  input.buf[input.e] = input.buf[input.e+1];
+			  input.e++;
+			}
+			input.buf[input.e] = '\0';
+			consputc(BACKSPACE);
+			for(i = 0; i < arrows_counter+1; i++)
+				consputc(input.buf[input.e - arrows_counter +i ]);
+			for(i = 0; i < arrows_counter+1; i++)
+				consputc(KEY_LF);
+		  }
+		  break;
+
+		case KEY_LF:
+		  if(arrows_counter < input.e - input.r) {
+			  arrows_counter++;
+			  consputc(c);
+		  }
+		  break;
+
+		case KEY_RT:
+			if(arrows_counter > 0) {
+				arrows_counter--;
+				consputc(c);
+			}
+			break;
+
+		case KEY_UP: // up arrow
+			for (i = 0; i < arrows_counter ; i++) {	// fixing POS with RightKey
+				consputc(KEY_RT);
+			}
+
+			while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n') {
+				input.e--;
+				consputc(BACKSPACE);
+			}
+
+			if (history.iter-1 == -1)
+				history.iter = history.num_of_curr_entries-1;
+			else
+				history.iter--;
+
+			for (i = 0; i < strlen(history.commands[history.iter]); i++) {
+			  input.buf[input.e] = history.commands[history.iter][i];
+			  consputc(history.commands[history.iter][i]);
+			  input.e++;
+			}
+
+			arrows_counter = 0; // reset arrows counter because its a new line
+			input.buf[input.e] = '\0';
+			break;
+
+		case KEY_DN: // down arrow
+			for (i=0 ; i < arrows_counter ; i++) {	// fixing POS with RightKey
+				consputc(KEY_RT);
+			}
+			while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n') {
+				input.e--;
+				consputc(BACKSPACE);
+			}
+
+			if (history.iter+1 == history.num_of_curr_entries)
+				history.iter = 0;
+			else
+				history.iter++;
+
+			for(i=0; i < strlen(history.commands[history.iter]); i++) {
+			  input.buf[input.e] = history.commands[history.iter][i];
+			  consputc(history.commands[history.iter][i]);
+			  input.e++;
+			}
+
+			arrows_counter = 0;
+			input.buf[input.e] = '\0';
+			break;
+
+		default:
+		  if(c != 0 && input.e-input.r < INPUT_BUF) {
+			  if(arrows_counter > 0 && c != '\n' && c != C('D') && input.e != input.r+INPUT_BUF) {
+				  e_pos = input.e;
+				  //shift characters left
+				  for(i = 0; i < arrows_counter; ++i) {
+					input.buf[input.e] = input.buf[input.e-1];
+					input.e--;
+				  }
+				  input.buf[input.e % INPUT_BUF] = c;
+				  consputc(c);
+				  for(i = 0; i < arrows_counter; ++i) {
+					  consputc(input.buf[input.e+i+1]);
+				  }
+				  for(i = 0; i < arrows_counter; ++i) {
+					  cgaputc(KEY_LF);
+				  }
+				  e_pos++;
+				  input.e = e_pos;
+			  } else
+				  input.buf[input.e++ % INPUT_BUF] = c;		// "regular" char to buffer
+
+			  if (arrows_counter == 0 && c != '\n' && c != C('D'))
+				  consputc(c);								// "regular" char to console
+
+			  if (c == '\n' || c == C('D') || input.e == input.r+INPUT_BUF) {
+				  input.w = input.e;
+				  arrows_counter = 0;
+				  wakeup(&input.r);
+				  consputc(c);
+			  }
+		  }
       break;
-    case C('U'):  // Kill line.
-      while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n'){
-        input.e--;
-        consputc(BACKSPACE);
-      }
-      break;
-    case C('H'): case '\x7f':  // Backspace
-      if(input.e != input.w){
-        input.e--;
-    	input.e -= arrows_counter;
-    	for(i = 0; i < arrows_counter; ++i)
-    	{
-    	  input.buf[input.e] = input.buf[input.e+1];
-    	  ++input.e;
-    	}
-    	input.buf[input.e] = '\0';  //null terminated
-        consputc(BACKSPACE);
-
-        for(i = 0; i <= arrows_counter; ++i)
-        	consputc(input.buf[input.e - arrows_counter +i ]);
-
-        for(i = 0; i <= arrows_counter; ++i)
-        	cgaputc(KEY_LF);
-      }
-      break;
-
-    case KEY_LF:
-      if(arrows_counter < input.e - input.r) {
-    	  arrows_counter++;
-    	  consputc(c);
-      }
-      break;
-
-    case KEY_RT:
-    	if(arrows_counter > 0) {
-    		arrows_counter--;
-    		consputc(c);
-    	}
-    	break;
-
-    case KEY_UP: // up arrow
-      while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n') {
-    		input.e--;
-    	    consputc(BACKSPACE);
-    	}
-
-        for(i=0; i < strlen(history.commands[history.iter]); i++)
-        {
-          input.buf[i] = history.commands[history.iter][i];
-          consputc(history.commands[history.iter][i]);
-        }
-
-        if (history.iter-1 == -1)
-        	history.iter = history.num_of_curr_entries-1;
-        else
-        	history.iter--;
-
-        input.buf[i] = '\0';
-        input.e = i;
-        input.r = input.w = 0;
-
-    	break;
-
-    case KEY_DN: // down arrow
-        	while(input.e != input.w && input.buf[(input.e-1) % INPUT_BUF] != '\n') {
-        		input.e--;
-        	    consputc(BACKSPACE);
-        	}
-
-        	if (history.iter+1 == history.num_of_curr_entries)
-        		history.iter = 0;
-        	else
-        		history.iter++;
-
-            for(i=0; i < strlen(history.commands[history.iter]); i++)
-            {
-              input.buf[i] = history.commands[history.iter][i];
-              consputc(history.commands[history.iter][i]);
-            }
-
-
-            input.buf[i] = '\0';
-            input.e = i;
-            input.r = input.w = 0;
-
-        	break;
-
-    default:
-      if(c != 0 && input.e-input.r < INPUT_BUF){
-    	  if(arrows_counter > 0 && c != '\n' && c != C('D') && input.e != input.r+INPUT_BUF) {
-    		  e_pos = input.e;
-    	  	  //shift characters left
-    	  	  for(i = 0; i < arrows_counter; ++i) {
-    	  	    input.buf[input.e] = input.buf[input.e-1];
-    	  	    --input.e;
-    	  	  }
-
-    	  	  input.buf[input.e % INPUT_BUF] = c;
-    	  	  consputc(c);
-
-    	  	  for(i = 0; i < arrows_counter; ++i) {
-    	  		  consputc(input.buf[input.e+i+1]);
-    	  	  }
-
-    	  	  for(i = 0; i < arrows_counter; ++i) {
-    	  		  cgaputc(KEY_LF);
-    	  	  }
-
-    	  	  e_pos++;
-    	  	  input.e = e_pos;
-    	  	}
-    	  	else {
-    	  	  input.buf[input.e++ % INPUT_BUF] = c;
-    	  	}
-
-    	  	if(arrows_counter == 0 && c != '\n' && c != C('D'))
-    	  	  consputc(c);
-
-    	    if(c == '\n' || c == C('D') || input.e == input.r+INPUT_BUF) {
-    	    	input.w = input.e;
-    	    	arrows_counter = 0;
-    	    	wakeup(&input.r);
-    	    	consputc(c);
-    	    }
-      }
-      break;
-    }
-  }
+    } // end of switch
+  } // end of while
   release(&input.lock);
 }
 
@@ -391,9 +374,9 @@ consoleread(struct inode *ip, char *dst, int n)
 				  history.commands[history.entry_point][i] = history.buf[i];
 
 			  history.commands[history.entry_point][i] = '\0';
-			  history.iter = history.entry_point;
 			  history.entry_point++;
 			  history.entry_point %= MAX_HISTORY_LENGTH;  // FIFO 18 19 0 1 2..
+			  history.iter = history.entry_point;
 
 			  // updates number of current entries (when maxed out - will not change)
 			  history.num_of_curr_entries = (history.num_of_curr_entries < MAX_HISTORY_LENGTH-1) ? history.entry_point : MAX_HISTORY_LENGTH;
