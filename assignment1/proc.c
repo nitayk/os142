@@ -568,8 +568,18 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING)
-        p->state = RUNNABLE;
+      if(p->state == SLEEPING){
+	p->state = RUNNABLE;
+	if (p->priority == LOW)
+	  p->priority = MEDIUM;
+	else
+	  p->priority = HIGH;
+	p->queuenum = ptable.FRR_COUNTER++;
+	int tmp = ticks;
+	tmp = tmp - p->sleeptime;
+	p->iotime = p->iotime + tmp;
+      }
+      
       release(&ptable.lock);
       return 0;
     }
