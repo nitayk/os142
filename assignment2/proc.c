@@ -6,11 +6,11 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "signal.h"
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
-  int FRR_COUNTER;
 } ptable;
 
 static struct proc *initproc;
@@ -18,10 +18,14 @@ static struct proc *initproc;
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
-extern int sys_uptime(void);
 
 static void wakeup1(void *chan);
 
+void
+pinit(void)
+{
+  initlock(&ptable.lock, "ptable");
+}
 
 void updateAlarm(void)
 {
@@ -38,31 +42,10 @@ void updateAlarm(void)
   release(&ptable.lock);
 }
 
-// Update running-time and io-time of every relevant process
-/*void updateProcCounters(void){
-      struct proc *p;
-      acquire(&ptable.lock);
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-	  if (p->state == RUNNING){
-	    p->rtime = p->rtime + 1;
-	  }
-	  if (p->state == SLEEPING){
-	    p->iotime = p->iotime + 1;
-	  }
-      }
-      release(&ptable.lock); 
-} */
 
 void defaultSigHandler(void)
 {
   cprintf("A signal was accepted by process %d\n",proc->pid);
-}
-
-void
-pinit(void)
-{
-  ptable.FRR_COUNTER = 0;
-  initlock(&ptable.lock, "ptable");
 }
 
 //PAGEBREAK: 32
@@ -74,7 +57,8 @@ static struct proc*
 allocproc(void)
 {
   struct proc *p;
-  char *sp;  
+  char *sp;
+
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == UNUSED)
@@ -85,15 +69,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-  p->priority = MEDIUM;
-  p->queuenum = ptable.FRR_COUNTER++;
-  p->iotime = 0;
-  p->wtime = 0;
-  p->rtime = 0;
-  p->etime = 0;
-  p->sleeptime = 0;
-  p->waitBeforeAlarm = -1;
   
+  p->waitBeforeAlarm = -1;
   // set default handler
   int i = 0;
   for (i=0; i < NUMSIG ; i++){
@@ -101,7 +78,7 @@ found:
   }
   
   release(&ptable.lock);
-  
+
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
     p->state = UNUSED;
@@ -122,12 +99,7 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-  
-  // S
-  //acquire(&tickslock);
-  p->ctime = ticks; 
-  //release(&tickslock);
-  
+
   return p;
 }
 
@@ -233,8 +205,7 @@ exit(void)
 
   if(proc == initproc)
     panic("init exiting");
-  
-     
+
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
     if(proc->ofile[fd]){
@@ -247,12 +218,7 @@ exit(void)
   proc->cwd = 0;
 
   acquire(&ptable.lock);
-  
-  // Set end time of process
-  //acquire(&tickslock);
-  proc->etime = ticks;
-  //release(&tickslock);
-  
+
   // Parent might be sleeping in wait().
   wakeup1(proc->parent);
 
@@ -265,7 +231,6 @@ exit(void)
     }
   }
 
-    
   // Jump into the scheduler, never to return.
   proc->state = ZOMBIE;
   sched();
@@ -310,53 +275,6 @@ wait(void)
       return -1;
     }
 
-    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
-    sleep(proc, &ptable.lock);  //DOC: wait-sleep
-  }
-}
-
-int
-wait2(int *wtime, int *rtime, int *iotime)
-{
-  struct proc *p;
-  int havekids, pid;
-
-  acquire(&ptable.lock);
-  for(;;){
-    // Scan through table looking for zombie children.
-    havekids = 0;
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != proc)
-        continue;
-      havekids = 1;
-      if(p->state == ZOMBIE){
-        // Found one.
-        pid = p->pid;
-        kfree(p->kstack);
-        p->kstack = 0;
-        freevm(p->pgdir);
-        p->state = UNUSED;
-        p->pid = 0;
-        p->parent = 0;
-        p->name[0] = 0;
-        p->killed = 0;
-        
-	// Update RTIME and IOTIME, calc WTIME
-	*rtime = p->rtime;
-	*iotime = p->iotime;
-	*wtime = p->etime - p->ctime - p->rtime - p->iotime;
-	
-	release(&ptable.lock);
-        return pid;
-      }
-    }
-
-    // No point waiting if we don't have any children.
-    if(!havekids || proc->killed){
-      release(&ptable.lock);
-      return -1;
-    }
-        
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(proc, &ptable.lock);  //DOC: wait-sleep
   }
@@ -439,73 +357,27 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-      
-      #if defined(_FRR) || defined(_FCFS)
-      // look for smallest queue number
-      int minQueue = ptable.FRR_COUNTER;
-      struct proc *winner = p;
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-	if(p->state == RUNNABLE && p->queuenum < minQueue){
-	  minQueue = p->queuenum;
-	  winner = p;
-	}
-      }
-      p = winner;
-      #endif // FRR or FCFS
-      #ifdef _3Q
-      int minQueue = ptable.FRR_COUNTER; // dummy value
-      struct proc *winner = 0;
-      // look for HIGH priority process
-      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-	if(p->state == RUNNABLE && p->priority == HIGH && p->queuenum < minQueue){
-	  minQueue = p->queuenum;
-	  winner = p;
-	}
-      }
-      if (!winner){
-	  // look for MEDIUM priority process
-	  minQueue = ptable.FRR_COUNTER; // dummy value
-	  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-	  if(p->state == RUNNABLE && p->priority == MEDIUM && p->queuenum < minQueue){
-	    minQueue = p->queuenum;
-	    winner = p;
-	  }
-	}
-      }
-      if (!winner){
-	  // look for LOW priority process
-	  minQueue = ptable.FRR_COUNTER; // dummy value
-	  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-	  if(p->state == RUNNABLE && p->priority == LOW && p->queuenum < minQueue){
-	    minQueue = p->queuenum;
-	    winner = p;
-	  }
-	}
-      }
-      p = winner;
-      #endif // 3Q
-	
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
-      p->quanta = 1;
-      // signal handling
+	  // signal handling
       if (p->pending){
         int i;
-	for (i = 0; i < NUMSIG; i++){
-	  if ((p->pending & (1 << i)) != 0){
-	    if (p->sighandlers[i] == defaultSigHandler){
-	      defaultSigHandler();
-    	    }
-	    else{
-	      register_handler(p->sighandlers[i]);
-            }
-	    p->pending = p->pending - (1 << i);
-	  }
-	}
+		  for (i = 0; i < NUMSIG; i++){
+			if ((p->pending & (1 << i)) != 0){
+			  if (p->sighandlers[i] == defaultSigHandler){
+				defaultSigHandler();
+			  }
+			  else{
+				register_handler(p->sighandlers[i]);
+			  }
+			  p->pending = p->pending - (1 << i);
+			}
+		  }
       }
       swtch(&cpu->scheduler, proc->context);
       switchkvm();
@@ -545,7 +417,6 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   proc->state = RUNNABLE;
-  proc->queuenum = ptable.FRR_COUNTER++;
   sched();
   release(&ptable.lock);
 }
@@ -593,8 +464,6 @@ sleep(void *chan, struct spinlock *lk)
   }
 
   // Go to sleep.
-  if (proc)
-    proc->sleeptime = ticks;
   proc->chan = chan;
   proc->state = SLEEPING;
   sched();
@@ -616,19 +485,10 @@ static void
 wakeup1(void *chan)
 {
   struct proc *p;
-  
+
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan){
+    if(p->state == SLEEPING && p->chan == chan)
       p->state = RUNNABLE;
-      if (p->priority == LOW)
-	p->priority = MEDIUM;
-      else
-	p->priority = HIGH;
-      p->queuenum = ptable.FRR_COUNTER++;
-      int tmp = ticks;
-      tmp = tmp - p->sleeptime;
-      p->iotime = p->iotime + tmp;
-    }
 }
 
 // Wake up all processes sleeping on chan.
@@ -653,18 +513,8 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING){
-	p->state = RUNNABLE;
-	if (p->priority == LOW)
-	  p->priority = MEDIUM;
-	else
-	  p->priority = HIGH;
-	p->queuenum = ptable.FRR_COUNTER++;
-	int tmp = ticks;
-	tmp = tmp - p->sleeptime;
-	p->iotime = p->iotime + tmp;
-      }
-      
+      if(p->state == SLEEPING)
+        p->state = RUNNABLE;
       release(&ptable.lock);
       return 0;
     }

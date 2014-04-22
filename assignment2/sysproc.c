@@ -6,7 +6,6 @@
 #include "mmu.h"
 #include "proc.h"
 
-
 int
 sys_fork(void)
 {
@@ -24,16 +23,6 @@ int
 sys_wait(void)
 {
   return wait();
-}
-
-int
-sys_wait2(void)
-{
-  int *wtime, *rtime, *iotime; 
-  if (argptr(0, (void*)&wtime, sizeof(wtime)) <0) return -1;
-  if (argptr(1, (void*)&rtime, sizeof(rtime)) <0) return -1;
-  if (argptr(2, (void*)&iotime, sizeof(iotime)) <0) return -1;
-  return wait2(wtime, rtime, iotime);
 }
 
 int
@@ -126,14 +115,4 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
-}
-
-// assignment1 - 1.2 - returning to the "real" implementation in sh.c
-int
-sys_add_path(void) {
-          char *path;
-          if(argstr(0, &path) < 0)
-            return -1;
-          return add_path(path);
-
 }

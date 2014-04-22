@@ -7,49 +7,19 @@
 #include "x86.h"
 #include "elf.h"
 
-#include "our_header.h"
-
-char* strcpy(char *, char *);
-
-//int first_visit = 1;
-
-//struct PATH {
-static int path_counter = 0;
-static char search_paths[MAX_PATH_ENTRIES][MAX_ENTRY_LEN+1] = {{""}}; // +1 for NULL terminated
-//};
-//static struct PATH* ev_path;
-
-
 int
 exec(char *path, char **argv)
 {
-  char *s, *last ;
-  int i,off,stop;
-  char full_path_cmd[MAX_ENTRY_LEN]; // assignment 1 - 1.1
+  char *s, *last;
+  int i, off;
   uint argc, sz, sp, ustack[3+MAXARG+1];
   struct elfhdr elf;
   struct inode *ip;
   struct proghdr ph;
   pde_t *pgdir, *oldpgdir;
-  stop = 0;
-/*  if (first_visit == 1) {
-	  ev_path->path_counter = 0 ;
-	  first_visit = 0 ;
-  }*/
-  if((ip = namei(path)) == 0) {
-	  // assignment 1 - 1.1 - search in PATH if didn't found in working dir
-	  for (i = 0 ; i < path_counter && !stop ; ++i) {
-	  	strcpy(full_path_cmd, search_paths[i]);
-	  	strcpy(full_path_cmd+strlen(search_paths[i]), path);
-	  	if((ip = namei(full_path_cmd)) != 0) {
-	  		stop = 1;
-	  	}
-	  }
-	  if (!stop)
-		  return -1;
-  }
 
-
+  if((ip = namei(path)) == 0)
+    return -1;
   ilock(ip);
   pgdir = 0;
 
@@ -129,29 +99,3 @@ exec(char *path, char **argv)
     iunlockput(ip);
   return -1;
 }
-
-char*
-strcpy(char *s, char *t)
-{
-  char *os;
-
-  os = s;
-  while((*s++ = *t++) != 0)
-    ;
-  return os;
-}
-
-int add_path(char* path) {
-	int next_char = 0;
-	if (path_counter > MAX_PATH_ENTRIES) {
-		return path_counter;
-	}
-	while(*path != 0 && *path != '\n' && *path != '\t' && *path != '\r' && *path != ' ') {
-		search_paths[path_counter][next_char] = *path;
-		next_char++;
-		path++;
-	}
-	path_counter++;
-	return 0;
-}
-

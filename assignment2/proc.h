@@ -69,21 +69,11 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  int ctime;		       // Process creation time
-  int wtime;		       // Process wait time
-  int etime;		       // Process end time
-  int iotime;		       // Process IO time
-  int rtime;		       // Process run time
-  int sleeptime;	       // rememeber timestamp for sleeping
-  int quanta;		       // each process holds its quanta
-  int queuenum;		       // process number in execution queue
-  int priority;                // process priority HIGH/MEDIUM/LOW
-  int pending;		       // pending signals
+  int pending;		           // pending signals
   sighandler_t sighandlers[NUMSIG];  // signal handlers
   int waitBeforeAlarm;         // used for alarm(ticks) syscall
 };
 
-void updateProcCounters(void);
 void defaultSigHandler(void);
 void updateAlarm(void);
 

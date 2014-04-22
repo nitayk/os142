@@ -96,10 +96,8 @@ extern int sys_sbrk(void);
 extern int sys_sleep(void);
 extern int sys_unlink(void);
 extern int sys_wait(void);
-extern int sys_wait2(void);
 extern int sys_signal(void);
 extern int sys_sigsend(void);
-extern int sys_add_path(void);
 extern int sys_alarm(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
@@ -108,8 +106,6 @@ static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
 [SYS_wait]    sys_wait,
-[SYS_wait2]   sys_wait2,
-[SYS_add_path]   sys_add_path,
 [SYS_signal]  sys_signal,
 [SYS_sigsend] sys_sigsend,
 [SYS_alarm]   sys_alarm,

@@ -2,8 +2,6 @@
 #define SYS_fork    1
 #define SYS_exit    2
 #define SYS_wait    3
-#define SYS_wait2   22
-#define SYS_add_path   23
 #define SYS_signal  24
 #define SYS_sigsend 25
 #define SYS_alarm   26

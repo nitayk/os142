@@ -11,8 +11,6 @@
 SYSCALL(fork)
 SYSCALL(exit)
 SYSCALL(wait)
-SYSCALL(wait2)
-SYSCALL(add_path)
 SYSCALL(signal)
 SYSCALL(sigsend)
 SYSCALL(alarm)
