@@ -1,3 +1,4 @@
+#include "types.h"
 struct stat;
 typedef void (*sighandler_t)(void);
 

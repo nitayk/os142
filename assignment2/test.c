@@ -4,6 +4,7 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
+#include "uthread.h"
 
 #define N  1000
 /*
@@ -15,18 +16,25 @@ printf(int fd, char *s, ...)
 */
 
 void
-foo(void)
+foo(void* num)
 {
-	printf(1,"This is an alternative signal handler.\n");
+	printf(1,"Hello from thread number %d\n", num);
 }
 
 int
 main(void)
 {
-  printf(1,"Testing alarm()...\n");
-  signal(14,&foo);
-  alarm(5);
-  sleep(6);
-  
+  uthread_init();
+  printf(1,"Back from init\n");
+  int i=0;
+  int j=0;
+  for (i=0;i<5; i++){
+	j = uthread_create(foo,(void *)i);
+	printf(1,"Created thread %d\n",i);
+	}
+  uthred_join(2);
+  printf(1,"j = %d\n",j);
+  sleep(5);
   exit();
+  return 0;
 } 
