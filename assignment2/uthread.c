@@ -81,16 +81,19 @@ void uthread_exit(void)
 	printf(1,"entered uthread_exit()\n");
 	
 	// Retrieve current thread
-	struct uthread *self = threadTable[uthred_self()];
+	self = threadTable[uthred_self()];
 	
 	// Free current thread's stack space
-	free(self->stack);
+	if (self->tid)
+		free(self->stack);
 	
 	// Set state of thread as FREE
 	self->state = T_FREE;
 	
 	// Update number of running threads
 	currentThreads--;
+	
+	printf(1,"currentThreads = %d\n",currentThreads);
 	
 	if (currentThreads == 0){
 		printf(1,"currentThreads = 0 , FREEING ALL RESOURCES!\n");
@@ -112,7 +115,8 @@ void uthread_exit(void)
 		threadTable[runningId]->firstrun = 0;
 		wrapper(threadTable[runningId]->entry,threadTable[runningId]->value);
 	}
-		return;
+	
+	return;
 
 }
 

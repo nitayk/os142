@@ -1,5 +1,4 @@
 // Test that fork fails gracefully.
-// Tiny executable so that the limit can be filling the proc table.
 
 #include "types.h"
 #include "stat.h"
@@ -18,7 +17,9 @@ printf(int fd, char *s, ...)
 void
 foo(void* num)
 {
-	printf(1,"Hello from thread number %d\n", num);
+	int i = (int) num;
+	i = i*i;
+	printf(1,"Hello from thread number %d\n", i);
 }
 
 int
@@ -32,9 +33,12 @@ main(void)
 	j = uthread_create(foo,(void *)i);
 	printf(1,"Created thread %d\n",i);
 	}
+  uthred_join(1);
   uthred_join(2);
+  uthred_join(3);
+  uthred_join(4);
   printf(1,"j = %d\n",j);
   sleep(5);
-  exit();
+  uthread_exit();
   return 0;
 } 
