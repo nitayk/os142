@@ -14,24 +14,28 @@ printf(int fd, char *s, ...)
 }
 */
 
-void
-foo(void* num)
-{
-	int i = (int) num;
-	i = i*i;
-	printf(1,"Hello from thread number %d\n", i);
-}
+static struct binary_semaphore* semaphore;
+
+void foo(void* num);
 
 int
 main(void)
 {
   uthread_init();
-  printf(1,"Back from init\n");
+  printf(1,"Back from threads init\n");
   int i=0;
   int j=0;
-  for (i=0;i<5; i++){
-	j = uthread_create(foo,(void *)i);
-	printf(1,"Created thread %d\n",i);
+  
+  semaphore = malloc(sizeof(struct binary_semaphore));
+  
+  binary_semaphore_init(semaphore, 1);
+  printf(1,"Back from semaphore init\n");
+  
+  
+  
+  for (i=0;i<4; i++){
+	j = uthread_create(foo,(void *)i );
+	printf(1,"Created thread %d\n",j);
 	}
   uthred_join(1);
   uthred_join(2);
@@ -42,3 +46,21 @@ main(void)
   uthread_exit();
   return 0;
 } 
+
+void
+foo(void* num)
+{
+	int i = (int)num + 1;
+	
+	printf(1,"thread %d requesting key\n",i);
+	binary_semaphore_down(semaphore);
+	printf(1,"thread %d got key\n",i);
+	
+	printf(1,"Hello from thread number %d\n", i);
+	
+	sleep(6);
+	
+	printf(1,"thread %d returning key\n",i);
+	binary_semaphore_up(semaphore);
+	printf(1,"thread %d returned key\n",i);
+}
