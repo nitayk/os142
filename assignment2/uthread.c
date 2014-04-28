@@ -269,5 +269,4 @@ void binary_semaphore_up(struct binary_semaphore* semaphore)
 	}
 	
 	alarm(THREAD_QUANTA);
-	
 }
