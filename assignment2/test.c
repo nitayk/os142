@@ -7,7 +7,7 @@
 void test(void *t){
   int i = 0;
         while (i < 50){
-                printf(1,"thread child %p\n", t);
+                printf(1,"thread child %d\n", (int)t);
                 i++;
                 sleep(60);
         }
@@ -15,13 +15,13 @@ void test(void *t){
 }
 int main(int argc,char** argv){
         uthread_init();
-        int tid = uthread_create(test, (void *) 1);
-        if (!tid)
+        int i;
+		for (i=1;i<25;i++){
+			int tid = uthread_create(test, (void *) i);
+			if (!tid)
                 goto out_err;
-        tid = uthread_create(test, (void *) 2);
-        if (!tid)
-                goto out_err;
-   
+		}
+		   
     while (1){
           printf(1,"thread father\n");
           sleep(60);

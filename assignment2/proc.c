@@ -180,6 +180,9 @@ fork(void)
   for (i=0;i<NUMSIG;i++)
     np->sighandlers[i] = proc->sighandlers[i];
 
+  np->pending = proc->pending;
+  np->waitBeforeAlarm = proc->waitBeforeAlarm;
+
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
