@@ -166,7 +166,7 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_test\
-	_FSSPok\
+	_FSSP\
 
 	
 
