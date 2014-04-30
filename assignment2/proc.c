@@ -27,6 +27,8 @@ pinit(void)
   initlock(&ptable.lock, "ptable");
 }
 
+/****** Task 1 ******/
+
 void updateAlarm(void)
 {
   struct proc *p;
@@ -70,8 +72,8 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   
+  // Task 1 - init waiting field and set default handlers
   p->waitBeforeAlarm = -1;
-  // set default handler
   int i = 0;
   for (i=0; i < NUMSIG ; i++){
     p->sighandlers[i] = defaultSigHandler;
@@ -176,7 +178,7 @@ fork(void)
   np->parent = proc;
   *np->tf = *proc->tf;
   
-  // Copy signal handlers from parent
+  // Task 1 - Copy alarm-related fields from parent
   for (i=0;i<NUMSIG;i++)
     np->sighandlers[i] = proc->sighandlers[i];
 
@@ -283,6 +285,7 @@ wait(void)
   }
 }
 
+// Task 1 - link handler to specific process's signal
 int
 signal(int signum, sighandler_t handler)
 {
@@ -292,6 +295,7 @@ signal(int signum, sighandler_t handler)
   return 0;
 }
 
+// Task 1 - send signal to process
 int
 sigsend(int pid, int signum)
 {
@@ -310,6 +314,7 @@ sigsend(int pid, int signum)
   return ans;
 }
 
+// Task 1 - set waitBeforeAlarm field to current process
 void
 alarm(int ticks)
 {
@@ -367,7 +372,7 @@ scheduler(void)
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
-	  // signal handling
+      // Task 1 - handle signals before context switching
       if (p->pending){
         int i;
 		  for (i = 0; i < NUMSIG; i++){

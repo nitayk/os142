@@ -2,7 +2,6 @@
 #include "stat.h"
 #include "user.h"
 #include "uthread.h"
-
 #define S_Q 0
 #define S_R 1
 #define S_L 2
@@ -10,6 +9,8 @@
 #define S_ASTRIX 4
 #define S_F 5 
 #define S_E -1
+
+/****** Task 4 - FSSP problem  ******/
 
 struct  {
 	int counter;

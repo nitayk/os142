@@ -51,7 +51,8 @@ trap(struct trapframe *tf)
     if(cpu->id == 0){
       acquire(&tickslock);
       ticks++;
-	  updateAlarm();
+      // Task 1- update waitForAlarm fields for all processes
+      updateAlarm();
       wakeup(&ticks);
       release(&tickslock);
     }
