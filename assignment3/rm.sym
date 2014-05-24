@@ -1,8 +1,8 @@
 00001000 .text
 00001843 .rodata
 00001878 .eh_frame
-00001abc .data
-00001ad0 .bss
+00002abc .data
+00002ad0 .bss
 00000000 .comment
 00000000 .debug_aranges
 00000000 .debug_info
@@ -15,10 +15,10 @@
 00000000 printf.c
 00001397 putc
 000013bf printint
-00001abc digits.1029
+00002abc digits.1029
 00000000 umalloc.c
-00001ad0 base
-00001ad8 freep
+00002ad0 base
+00002ad8 freep
 0000170b morecore
 00000000 
 000010b4 strcpy
@@ -41,14 +41,14 @@
 000012ef fork
 0000137f sbrk
 0000138f uptime
-00001acd __bss_start
+00002acd __bss_start
 0000114a memset
 00001000 main
 000010e4 strcmp
 0000136f dup
 00001217 stat
-00001acd _edata
-00001adc _end
+00002acd _edata
+00002adc _end
 00001357 link
 000012f7 exit
 00001265 atoi

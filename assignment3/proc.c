@@ -480,24 +480,24 @@ procdump(void)
     cprintf("  memory location of page directory = %p\n",pgdir);
 
     for (i=0 ; i < NPDENTRIES ; i++) {
-    	if ((pgdir[i] & PTE_P) && (pgdir[i] & PTE_U) ) {	// check if USER PAGE and PRESENT
-    		cprintf("  pdir PTE %d,%d:\n",i,PTE_ADDR(pgdir[i])>>12);
-    		cprintf("    memory location of page table = %p\n",PTE_ADDR(pgdir[i]));
-    		pde_t * pgtbl = P2V(PTE_ADDR(pgdir[i]));
+    	if ((pgdir[i] & PTE_P) && (pgdir[i] & PTE_U) && (pgdir[i] & PTE_A) ) {	// check if USER PAGE and PRESENT
+    		cprintf("  pdir PTE %d,%d:\n",i,pgdir[i]>>12);
+    		pde_t * pgtbl = P2V(pgdir[i]>>12);
+    		cprintf("    memory location of page table = %p\n",pgtbl);
     	    for (j=0 ; j < NPTENTRIES; j++) {
-    	    	if ((pgtbl[j] & PTE_P) && (pgtbl[j] & PTE_U))
-    	    		cprintf("    ptbl PTE %d,%d,%p\n",j,PTE_ADDR(pgtbl[j])>>12,V2P(PTE_ADDR(pgtbl[j])));
+    	    	if ((pgtbl[j] & PTE_P) && (pgtbl[j] & PTE_U) && (pgtbl[j] & PTE_A))
+    	    		cprintf("    ptbl PTE %d,%d,%p\n",j,pgtbl[j]>>12,P2V(PTE_ADDR(pgtbl[j])));
 
     	    }
     	}
     }
 	cprintf("Port Mappings:\n");
 	for (i=0 ; i < NPDENTRIES ; i++) {
-		if ((pgdir[i] & PTE_P) && (pgdir[i] & PTE_U) ) {	// check if USER PAGE and PRESENT
-			pde_t * pgtbl = P2V(PTE_ADDR(pgdir[i]));
+		if ((pgdir[i] & PTE_P) && (pgdir[i] & PTE_U) && (pgdir[i] & PTE_A)) {	// check if USER PAGE and PRESENT
+			pde_t * pgtbl = P2V(pgdir[i]>>12);
 			for (j=0 ; j < NPTENTRIES; j++) {
-				if ((pgtbl[j] & PTE_P) && (pgtbl[j] & PTE_U))
-					cprintf("%d -> %d\n",j,PTX(pgtbl[j]));
+				if ((pgtbl[j] & PTE_P) && (pgtbl[j] & PTE_U) && (pgtbl[j] & PTE_A))
+					cprintf("%d -> %d\n",(i<<10)|j,pgtbl[j]>>12);
 
 			}
 		}

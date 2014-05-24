@@ -1,8 +1,8 @@
 00001000 .text
 000024b0 .rodata
 000025a8 .eh_frame
-00002a28 .data
-00002a60 .bss
+00003a28 .data
+00003a60 .bss
 00000000 .comment
 00000000 .debug_aranges
 00000000 .debug_info
@@ -10,16 +10,16 @@
 00000000 .debug_line
 00000000 .debug_str
 00000000 sh.c
-00002a60 buf.1067
+00003a60 buf.1067
 00000000 ulib.c
 00001cf9 stosb
 00000000 printf.c
 00002001 putc
 00002029 printint
-00002a36 digits.1029
+00003a36 digits.1029
 00000000 umalloc.c
-00002ac4 base
-00002acc freep
+00003ac4 base
+00003acc freep
 00002375 morecore
 00000000 
 00001d1e strcpy
@@ -37,7 +37,7 @@
 00001532 gettoken
 000023cd malloc
 00001ff1 sleep
-00002a28 whitespace
+00003a28 whitespace
 0000137d fork1
 00001c18 nulterminate
 00001f71 pipe
@@ -51,7 +51,7 @@
 000019fe parseblock
 00001f99 exec
 00001f69 wait
-00002a2e symbols
+00003a2e symbols
 00001f79 read
 00001ad2 parseexec
 00001fb1 unlink
@@ -59,7 +59,7 @@
 00001f59 fork
 00001fe9 sbrk
 00001ff9 uptime
-00002a47 __bss_start
+00003a47 __bss_start
 00001db4 memset
 00001269 main
 00001d4e strcmp
@@ -67,8 +67,8 @@
 0000144b pipecmd
 000013e0 redircmd
 00001e81 stat
-00002a47 _edata
-00002ad0 _end
+00003a47 _edata
+00003ad0 _end
 00001fc1 link
 00001f61 exit
 00001ecf atoi

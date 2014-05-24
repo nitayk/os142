@@ -11,7 +11,7 @@ int
 exec(char *path, char **argv)
 {
   char *s, *last;
-  int i, off;
+  int i, off, writeFlag;
   uint argc, sz, sp, ustack[3+MAXARG+1];
   struct elfhdr elf;
   struct inode *ip;
@@ -43,7 +43,8 @@ exec(char *path, char **argv)
       goto bad;
     if((sz = allocuvm(pgdir, sz, ph.vaddr + ph.memsz)) == 0)
       goto bad;
-    if(loaduvm(pgdir, (char*)ph.vaddr, ip, ph.off, ph.filesz) < 0)
+    writeFlag = ph.flags & ELF_PROG_FLAG_WRITE;
+    if(loaduvm(pgdir, (char*)ph.vaddr, ip, ph.off, ph.filesz, writeFlag) < 0)
       goto bad;
   }
   iunlockput(ip);

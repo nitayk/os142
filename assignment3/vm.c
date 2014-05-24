@@ -195,17 +195,21 @@ inituvm(pde_t *pgdir, char *init, uint sz)
 // Load a program segment into pgdir.  addr must be page-aligned
 // and the pages from addr to addr+sz must already be mapped.
 int
-loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
+loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz, int writeFlag)
 {
   uint i, pa, n;
   pte_t *pte;
 
-  if((uint) addr % PGSIZE != 0)
-    panic("loaduvm: addr must be page aligned");
+  //if((uint) addr % PGSIZE != 0)	task3 changes
+   // panic("loaduvm: addr must be page aligned");
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, addr+i, 0)) == 0)
       panic("loaduvm: address should exist");
-    pa = PTE_ADDR(*pte);
+    if (!writeFlag) {
+    	*pte = *pte & ~PTE_W;		// turn off WRITEABLE flag
+    }
+    pa = PTE_ADDR(*pte)+((uint)(addr)%PGSIZE);	// add padding
+    // pa = PTE_ADDR(*pte); task 3
     if(sz - i < PGSIZE)
       n = sz - i;
     else
@@ -326,8 +330,13 @@ copyuvm(pde_t *pgdir, uint sz)
     if((mem = kalloc()) == 0)
       goto bad;
     memmove(mem, (char*)p2v(pa), PGSIZE);
-    if(mappages(d, (void*)i, PGSIZE, v2p(mem), PTE_W|PTE_U) < 0)
-      goto bad;
+    if (*pte & PTE_W) {			// task3, should the child process have WRITE access when copying
+    	if(mappages(d, (void*)i, PGSIZE, v2p(mem), PTE_W|PTE_U) < 0)
+          goto bad;
+    } else {
+    	if(mappages(d, (void*)i, PGSIZE, v2p(mem), PTE_U) < 0)
+    	          goto bad;
+    }
   }
   return d;
 
