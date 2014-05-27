@@ -1,0 +1,20 @@
+--- syscall.c	(revision 3)
++++ syscall.c	(working copy)
+@@ -83,6 +83,8 @@
+ extern int sys_exec(void);
+ extern int sys_exit(void);
+ extern int sys_fork(void);
++extern int sys_cowfork(void);
++extern int sys_procdump(void);
+ extern int sys_fstat(void);
+ extern int sys_getpid(void);
+ extern int sys_kill(void);
+@@ -101,6 +103,8 @@
+ 
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
++[SYS_cowfork]    sys_cowfork,
++[SYS_procdump]    sys_procdump,
+ [SYS_exit]    sys_exit,
+ [SYS_wait]    sys_wait,
+ [SYS_pipe]    sys_pipe,
