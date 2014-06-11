@@ -111,6 +111,30 @@ sys_fstat(void)
   return filestat(f, st);
 }
 
+int //task1.b
+sys_symlink(void)
+{
+	 char *old, *new;
+	 struct inode *ip;
+
+	  if(argstr(0, &old) < 0 || argstr(1, &new) < 0)
+	    return -1;
+
+	  begin_trans();
+	  if((ip = create(new, FD_SYMLINK, 0, 0)) == 0){
+	    commit_trans();
+	    return -1;
+	  }
+	  ip->type = FD_SYMLINK;
+	  iupdate(ip);
+
+	  writei(ip, old, 0, strlen(old));
+
+	  iunlockput(ip);
+	  commit_trans();
+	  return 0;
+}
+
 // Create the path new as a link to the same inode as old.
 int
 sys_link(void)
