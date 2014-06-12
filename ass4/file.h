@@ -26,6 +26,9 @@ struct inode {
 #define I_BUSY 0x1
 #define I_VALID 0x2
 
+//task1.b
+#define LOOP_PROTECTION 16
+
 // table mapping major device number to
 // device functions
 struct devsw {

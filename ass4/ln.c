@@ -9,7 +9,6 @@ main(int argc, char *argv[])
     printf(2, "Usage: ln old new\n");
     exit();
   }
-
   if(argc == 4 && strcmp(argv[1], "-s") == 0){
   	if(symlink(argv[2], argv[3]) < 0)
    		printf(1, "link -s %s %s: failed\n", argv[2], argv[3]);

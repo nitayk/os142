@@ -643,17 +643,25 @@ skipelem(char *path, char *name)
 // If parent != 0, return the inode for the parent and copy the final
 // path element into name, which must have room for DIRSIZ bytes.
 static struct inode*
-namex(char *path, int nameiparent, char *name)
+namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos)
 {
   struct inode *ip, *next;
+  char buf[100], tname[DIRSIZ];
+
+  if (l_counter > LOOP_PROTECTION) {
+	  return 0;  // probably infinite loop.
+  }
 
   if(*path == '/')
     ip = iget(ROOTDEV, ROOTINO);
+  else if (last_pos)
+	ip = idup(last_pos);		// need to remember last inode
   else
-    ip = idup(proc->cwd);
+	ip = idup(proc->cwd);
 
-  while((path = skipelem(path, name)) != 0){
-    ilock(ip);
+  while((path = skipelem(path, name)) != 0) {
+	  cprintf("path is %s , name is %s\n", path, name);
+	  ilock(ip);
     if(ip->type != T_DIR){
       iunlockput(ip);
       return 0;
@@ -664,10 +672,25 @@ namex(char *path, int nameiparent, char *name)
       return ip;
     }
     if((next = dirlookup(ip, name, 0)) == 0){
+      cprintf("could not find directory %s\n", name);
       iunlockput(ip);
       return 0;
     }
     iunlockput(ip);
+    ilock(next);  // lock next inode
+    if(next->type == FD_SYMLINK) {		// if symbolic link
+    	if(readi(next, buf, 0, next->size) != next->size) { // read pointed path
+    		iunlockput(next);
+    		iput(ip);
+    		return 0;
+    	}
+		buf[next->size] = 0;  // null terminated
+		iunlockput(next);
+		next = namex(buf, 0, tname, l_counter+1, ip);
+    }  else {
+      iunlock(next);
+    }
+    iput(ip);
     ip = next;
   }
   if(nameiparent){
@@ -681,11 +704,11 @@ struct inode*
 namei(char *path)
 {
   char name[DIRSIZ];
-  return namex(path, 0, name);
+  return namex(path, 0, name, 1, 0);
 }
 
 struct inode*
 nameiparent(char *path, char *name)
 {
-  return namex(path, 1, name);
+  return namex(path, 1, name, 1, 0);
 }

@@ -111,6 +111,31 @@ sys_fstat(void)
   return filestat(f, st);
 }
 
+static struct inode* create(char *path, short type, short major, short minor);
+
+int //task1.b
+sys_readlink(void) {
+	 char *pathname, *buf;
+	// size_t bufsize;
+	 uint counter;
+
+	 counter = 0;
+// if(argstr(0, &pathname) < 0 || argstr(1, &buf) < 0 || argint(2, bufsize) < 0)
+	  if(argstr(0, &pathname) < 0 || argstr(1, &buf) < 0)
+	    return -1;
+
+	  if (nameiparent(pathname, buf) == 0)
+		  return -1;
+	  while (*buf) {		// how many bytes we wrote to buffer
+		  counter++ ;							// not including '\0'
+		  (*buf)++;
+	  }
+
+	return counter;
+}
+
+
+
 int //task1.b
 sys_symlink(void)
 {
@@ -126,9 +151,9 @@ sys_symlink(void)
 	    return -1;
 	  }
 	  ip->type = FD_SYMLINK;
-	  iupdate(ip);
+	  iupdate(ip);			// update on-disk data
 
-	  writei(ip, old, 0, strlen(old));
+	  writei(ip, old, 0, strlen(old));		// write the old path into the inode of the new one
 
 	  iunlockput(ip);
 	  commit_trans();
