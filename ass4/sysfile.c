@@ -146,11 +146,11 @@ sys_symlink(void)
 	    return -1;
 
 	  begin_trans();
-	  if((ip = create(new, FD_SYMLINK, 0, 0)) == 0){
+	  if((ip = create(new, T_SYMLINK, 0, 0)) == 0){
 	    commit_trans();
 	    return -1;
 	  }
-	  ip->type = FD_SYMLINK;
+	  ip->type = T_SYMLINK;
 	  iupdate(ip);			// update on-disk data
 
 	  writei(ip, old, 0, strlen(old));		// write the old path into the inode of the new one

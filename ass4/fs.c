@@ -271,9 +271,16 @@ ilock(struct inode *ip)
   struct buf *bp;
   struct dinode *dip;
 
-  if(ip == 0 || ip->ref < 1)
-    panic("ilock");
+  if (ip){
+	//int z = (int)ip->inum;
+	//cprintf("locking %d\n",z);
+  }
+  if(ip == 0)
+    panic("ilock ip == 0");
 
+  if (ip->ref < 1)
+    panic("ilock ip->ref < 1");
+  
   acquire(&icache.lock);
   while(ip->flags & I_BUSY)
     sleep(ip, &icache.lock);
@@ -300,9 +307,12 @@ ilock(struct inode *ip)
 void
 iunlock(struct inode *ip)
 {
+  if (ip){
+	//int z = (int)ip->inum;
+	//cprintf("unlocking %d\n",z);
+  }
   if(ip == 0 || !(ip->flags & I_BUSY) || ip->ref < 1)
     panic("iunlock");
-
   acquire(&icache.lock);
   ip->flags &= ~I_BUSY;
   wakeup(ip);
@@ -660,8 +670,9 @@ namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *las
 	ip = idup(proc->cwd);
 
   while((path = skipelem(path, name)) != 0) {
-	  cprintf("path is %s , name is %s\n", path, name);
-	  ilock(ip);
+    //cprintf("path is %s , name is %s\n", path, name);
+    //cprintf("calling ilock(ip)\n");  
+    ilock(ip);
     if(ip->type != T_DIR){
       iunlockput(ip);
       return 0;
@@ -676,9 +687,10 @@ namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *las
       iunlockput(ip);
       return 0;
     }
-    iunlockput(ip);
+    iunlock(ip);
+    //cprintf("calling ilock(next)\n");
     ilock(next);  // lock next inode
-    if(next->type == FD_SYMLINK) {		// if symbolic link
+    if(next->type == T_SYMLINK) {		// if symbolic link
     	if(readi(next, buf, 0, next->size) != next->size) { // read pointed path
     		iunlockput(next);
     		iput(ip);
