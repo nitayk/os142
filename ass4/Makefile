@@ -163,6 +163,8 @@ UPROGS=\
 	_zombie\
 	_big\
 	_s2\
+	_find\
+
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

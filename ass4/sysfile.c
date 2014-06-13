@@ -184,7 +184,7 @@ sys_link(void)
 
   if(argstr(0, &old) < 0 || argstr(1, &new) < 0)
     return -1;
-  if((ip = namei(old)) == 0)
+  if((ip = namei(old,0)) == 0)
     return -1;
 
   begin_trans();
@@ -353,24 +353,32 @@ int
 sys_open(void)
 {
   char *path;
-  int fd, omode;
+  int fd, omode, noderef;
   struct file *f;
   struct inode *ip;
 
-  if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
+  if(argstr(0, &path) < 0 || argint(1, &omode) < 0){
+    //cprintf("DEBUG: #1\n");
     return -1;
+    }
   if(omode & O_CREATE){
     begin_trans();
     ip = create(path, T_FILE, 0, 0);
     commit_trans();
-    if(ip == 0)
+    if(ip == 0){
+      //cprintf("DEBUG: #2\n");
       return -1;
+      }
   } else {
-    if((ip = namei(path)) == 0)
+    noderef = omode & O_NODEREF;
+    if((ip = namei(path,noderef)) == 0){
+      cprintf("DEBUG: #3\n");
       return -1;
+      }
     ilock(ip);
-    if(ip->type == T_DIR && omode != O_RDONLY){
+    if(ip->type == T_DIR && omode != O_RDONLY && omode != O_NODEREF){
       iunlockput(ip);
+      //cprintf("DEBUG: #4\n");
       return -1;
     }
   }
@@ -383,6 +391,7 @@ sys_open(void)
     if(f)
       fileclose(f);
     iunlockput(ip);
+    //cprintf("DEBUG: #5\n");
     return -1;
   }
   iunlock(ip);
@@ -438,7 +447,7 @@ sys_chdir(void)
   char *path;
   struct inode *ip;
 
-  if(argstr(0, &path) < 0 || (ip = namei(path)) == 0)
+  if(argstr(0, &path) < 0 || (ip = namei(path,0)) == 0)
     return -1;
   ilock(ip);
   if(ip->type != T_DIR){
