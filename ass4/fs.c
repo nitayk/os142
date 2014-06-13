@@ -653,7 +653,7 @@ skipelem(char *path, char *name)
 // If parent != 0, return the inode for the parent and copy the final
 // path element into name, which must have room for DIRSIZ bytes.
 static struct inode*
-namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos)
+namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos, int noderef)
 {
   struct inode *ip, *next;
   char buf[100], tname[DIRSIZ];
@@ -670,8 +670,6 @@ namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *las
 	ip = idup(proc->cwd);
 
   while((path = skipelem(path, name)) != 0) {
-    //cprintf("path is %s , name is %s\n", path, name);
-    //cprintf("calling ilock(ip)\n");  
     ilock(ip);
     if(ip->type != T_DIR){
       iunlockput(ip);
@@ -688,17 +686,22 @@ namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *las
       return 0;
     }
     iunlock(ip);
-    //cprintf("calling ilock(next)\n");
     ilock(next);  // lock next inode
     if(next->type == T_SYMLINK) {		// if symbolic link
-    	if(readi(next, buf, 0, next->size) != next->size) { // read pointed path
+    	if(noderef && *path == '\0'){
+            iunlock(next);
+            iput(ip);
+            return next;
+        }
+        
+        if(readi(next, buf, 0, next->size) != next->size) { // read pointed path
     		iunlockput(next);
     		iput(ip);
     		return 0;
     	}
 		buf[next->size] = 0;  // null terminated
 		iunlockput(next);
-		next = namex(buf, 0, tname, l_counter+1, ip);
+		next = namex(buf, 0, tname, l_counter+1, ip, 0);
     }  else {
       iunlock(next);
     }
@@ -713,14 +716,14 @@ namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *las
 }
 
 struct inode*
-namei(char *path)
+namei(char *path, int noderef)
 {
   char name[DIRSIZ];
-  return namex(path, 0, name, 1, 0);
+  return namex(path, 0, name, 1, 0, noderef);
 }
 
 struct inode*
 nameiparent(char *path, char *name)
 {
-  return namex(path, 1, name, 1, 0);
+  return namex(path, 1, name, 1, 0, 0);
 }
