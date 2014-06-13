@@ -24,6 +24,9 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int fprot(char*, char*);	//task2
+int funprot(char*, char*);	//task2
+int funlock(char*, char*);	//task2
 
 // ulib.c
 int stat(char*, struct stat*);

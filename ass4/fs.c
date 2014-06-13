@@ -212,6 +212,7 @@ iupdate(struct inode *ip)
   dip->nlink = ip->nlink;
   dip->size = ip->size;
   memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
+  memmove(dip->password, ip->password, sizeof(ip->password));  // task2 update new field
   log_write(bp);
   brelse(bp);
 }
@@ -296,6 +297,7 @@ ilock(struct inode *ip)
     ip->nlink = dip->nlink;
     ip->size = dip->size;
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
+    memmove(ip->password, dip->password, sizeof(ip->password)); // task2 update copying
     brelse(bp);
     ip->flags |= I_VALID;
     if(ip->type == 0)

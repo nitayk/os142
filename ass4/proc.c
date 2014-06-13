@@ -7,11 +7,19 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "signal.h"
+#include "fs.h"
+#include "file.h"
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+
+struct {
+  struct spinlock lock;
+  uint fileLockTable[NPROC][200];
+} fileTable;
+
 
 static struct proc *initproc;
 
@@ -25,6 +33,7 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initlock(&fileTable.lock, "Filetable");
 }
 
 //PAGEBREAK: 32
@@ -129,7 +138,7 @@ growproc(int n)
 int
 fork(void)
 {
-  int i, pid;
+  int i, pid, j;
   struct proc *np;
 
   // Allocate process.
@@ -151,8 +160,13 @@ fork(void)
   np->tf->eax = 0;
 
   for(i = 0; i < NOFILE; i++)
-    if(proc->ofile[i])
+    if(proc->ofile[i]) {
       np->ofile[i] = filedup(proc->ofile[i]);
+      acquire(&fileTable.lock);	//task2 - copy locked files to child process
+      for(j=0; j < 200; j++)
+    	  fileTable.fileLockTable[np->pid][j] = fileTable.fileLockTable[proc->pid][j];
+      release(&fileTable.lock);
+    }
   np->cwd = idup(proc->cwd);
  
   pid = np->pid;
@@ -168,10 +182,19 @@ void
 exit(void)
 {
   struct proc *p;
-  int fd;
+  int fd,i,j;
 
   if(proc == initproc)
     panic("init exiting");
+
+  acquire(&fileTable.lock);
+  for(i=0; i < 200; i++)
+	  for(j=0; j < NPROC; j++)
+		  if (fileTable.fileLockTable[j][i] == 1) {
+			  fileTable.fileLockTable[proc->pid][i] = 1;
+			  break;
+		  }
+  release(&fileTable.lock);
 
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
@@ -474,4 +497,46 @@ procdump(void)
   }
 }
 
+int
+search_for_open_file(uint inum) {  // searches for the file in the running process files
+	int i;
+    struct proc *proc;
+    acquire(&ptable.lock);
+    for(proc = ptable.proc; proc < &ptable.proc[NPROC]; proc++) {
+        if (proc->state == RUNNING || proc->state== RUNNABLE || proc->state==SLEEPING){
+        	for (i=0 ; i < NOFILE ; i++) {  // NOFILE = num of running files per process
+        		if (proc->ofile[i]!= 0) { // check if file num i is there.
+        			if((proc->ofile[i]->ip->inum) == inum) {
+        				release(&ptable.lock);
+        				return 1;  // found the file
+        			}
+        		}
+        	}
+        }
+	}
+    release(&ptable.lock);
+    return 0;
+}
+
+void
+update_file_for_all_procs(uint value, uint inum) {
+  int i;
+  acquire(&fileTable.lock);
+  for (i=0; i < NPROC; i++) {
+    fileTable.fileLockTable[i][inum] = value;
+  }
+  release(&fileTable.lock);
+}
+
+void
+disable_lock_for_proc(uint inum) {
+  acquire(&fileTable.lock);
+  fileTable.fileLockTable[proc->pid][inum] = 0;
+  release(&fileTable.lock);
+}
+
+int
+get_flt_value(uint inum) {
+  return fileTable.fileLockTable[proc->pid][inum];
+}
 

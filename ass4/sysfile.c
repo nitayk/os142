@@ -13,6 +13,7 @@
 #include "fs.h"
 #include "file.h"
 #include "fcntl.h"
+#include "x86.h"
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -59,6 +60,10 @@ sys_dup(void)
     return -1;
   if((fd=fdalloc(f)) < 0)
     return -1;
+
+  if (check_protected(f->ip,1) == -1)
+  	  return -1;
+
   filedup(f);
   return fd;
 }
@@ -72,6 +77,10 @@ sys_read(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
+
+  if (check_protected(f->ip,1) == -1)
+  	  return -1;
+
   return fileread(f, p, n);
 }
 
@@ -84,6 +93,10 @@ sys_write(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
+
+  if (check_protected(f->ip,1) == -1)
+  	  return -1;
+
   return filewrite(f, p, n);
 }
 
@@ -108,6 +121,10 @@ sys_fstat(void)
   
   if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&st, sizeof(*st)) < 0)
     return -1;
+
+   if (check_protected(f->ip,1) == -1)
+   	  return -1;
+
   return filestat(f, st);
 }
 
@@ -133,8 +150,6 @@ sys_readlink(void) {
 
 	return counter;
 }
-
-
 
 int //task1.b
 sys_symlink(void)
@@ -179,6 +194,11 @@ sys_link(void)
     iunlockput(ip);
     commit_trans();
     return -1;
+  }
+
+  if (check_protected(ip,0) == -1) {
+  	  commit_trans();
+	  return -1;
   }
 
   ip->nlink++;
@@ -250,6 +270,9 @@ sys_unlink(void)
     goto bad;
   ilock(ip);
 
+  if (check_protected(ip,0) == -1)  // no outer locking
+  	  goto bad;
+
   if(ip->nlink < 1)
     panic("unlink: nlink < 1");
   if(ip->type == T_DIR && !isdirempty(ip)){
@@ -307,6 +330,7 @@ create(char *path, short type, short major, short minor)
   ip->major = major;
   ip->minor = minor;
   ip->nlink = 1;
+  ip->file_state[0] = 'U';    // task2, init. to Unprotected
   iupdate(ip);
 
   if(type == T_DIR){  // Create . and .. entries.
@@ -350,6 +374,10 @@ sys_open(void)
       return -1;
     }
   }
+
+  // task2, check if file protected
+  if (check_protected(ip,0) == -1)	// no outer lock mode
+  	  return -1;
 
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
     if(f)
@@ -429,6 +457,7 @@ sys_exec(void)
   char *path, *argv[MAXARG];
   int i;
   uint uargv, uarg;
+  struct inode *ip;
 
   if(argstr(0, &path) < 0 || argint(1, (int*)&uargv) < 0){
     return -1;
@@ -446,7 +475,14 @@ sys_exec(void)
     if(fetchstr(proc, uarg, &argv[i]) < 0)
       return -1;
   }
-  return exec(path, argv);
+
+  if((ip = namei(path)) == 0)  // task2 - find i-node
+       return -1;
+
+  if (check_protected(ip,1) == -1)
+  	  return -1;
+
+return exec(path, argv);
 }
 
 int
@@ -458,6 +494,13 @@ sys_pipe(void)
 
   if(argptr(0, (void*)&fd, 2*sizeof(fd[0])) < 0)
     return -1;
+
+  if (check_protected(rf->ip,1) == -1)
+	  return -1;
+
+  if (check_protected(wf->ip,1) == -1)
+	  return -1;
+
   if(pipealloc(&rf, &wf) < 0)
     return -1;
   fd0 = -1;
@@ -472,3 +515,113 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+
+int				// task2, check if protected
+check_protected(struct inode *ip, uint mode) {	// mode 0 - no outer locking , mode 1 - normal
+	if (mode != 0)
+		ilock(ip);
+	if ((ip->type == T_FILE) && (ip->file_state[0] == 'P')&& (get_flt_value(ip->inum))) {
+		iunlock(ip);
+		return -1;
+	}
+	if (mode != 0)
+		iunlock(ip);
+	return 0;
+}
+
+int
+sys_funprot(void) {
+    char *pathName;
+    char *password;
+    struct inode *ip;
+
+   if(argstr(0, &pathName) < 0 || argstr(1, &password) < 0)
+      return -1;
+
+    if((ip = namei(pathName)) == 0)
+      return -1;
+
+    ilock(ip);
+    if((ip->type == T_FILE) && (ip->file_state[0] == 'P') && (get_flt_value(ip->inum))) {
+    	if (strlen(password) != strlen(ip->password)) {
+    		iunlock(ip);
+    		return -1;
+    	} else {
+    		if (strncmp(ip->password, password, strlen(password)) != 0) {
+    		  iunlock(ip);
+    		  return -1;
+    		} else {	// pass matched - making the file Unprotected
+    			ip->file_state[0] = 'U';
+    			update_file_for_all_procs(0, ip->inum); // updates all process that the file is Unprotected
+    			iunlock(ip);
+    		}
+    	}
+   } else
+      iunlock(ip);
+    return 0;
+}
+
+int
+sys_fprot(void) {
+    char *pathName;
+    char *password;
+    int len;
+    struct inode *ip;
+
+    if(argstr(0, &pathName) < 0 || argstr(1, &password) < 0)
+      return -1;
+
+    if((ip = namei(pathName)) == 0)  // get file i-node
+      return -1;
+
+    ilock(ip);
+    // fails if its not a FILE or FILE  is open or FILE is already Protected
+    if(ip->type != T_FILE || search_for_open_file(ip->inum) || ip->file_state[0] == 'P' ) {
+      iunlock(ip);
+      return -1;
+    }
+
+    len = strlen(password);
+    if(len > 9 ) {	// check pass length
+      iunlock(ip);
+      return -1;
+    } else {		// save the new password to the i-node
+    	ip->file_state[0] = 'P';
+    	strncpy(ip->password, password, len);
+    	update_file_for_all_procs(1,ip->inum);
+    	iunlock(ip);
+    	return 0;
+    }
+}
+
+int
+sys_funlock(void) {
+    char *pathName;
+    char *password;
+    struct inode *ip;
+
+    if(argstr(0, &pathName) < 0 || argstr(1, &password) < 0)
+      return -1;
+
+    if((ip = namei(pathName)) == 0)
+      return -1;
+
+    ilock(ip);
+    if((ip->type == T_FILE) && (ip->file_state[0] == 'P'))  {
+    	if (strlen(password)!= strlen(ip->password)) {
+    		iunlock(ip);
+    		return -1;
+    	} else {
+    		if (strncmp(ip->password, password, strlen(password)) != 0) {
+    			iunlock(ip);
+    			return -1;
+    		} else {
+    			disable_lock_for_proc(ip->inum);
+    			iunlock(ip);
+    		}
+    	}
+   } else
+	   iunlock(ip);
+  return 0;
+}
+

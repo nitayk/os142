@@ -22,6 +22,8 @@ struct inode {
   short nlink;
   uint size;
   uint addrs[NDIRECT+2];  //task1.a +2, was +1
+  char password[10];   		// task 2
+  char file_state[1];		// Protected or Unprotected
 };
 #define I_BUSY 0x1
 #define I_VALID 0x2
