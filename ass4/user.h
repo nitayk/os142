@@ -16,7 +16,7 @@ int unlink(char*);
 int fstat(int fd, struct stat*);
 int link(char*, char*);
 int symlink(const char*,const char*); // task1.b
-int readlink(const char, char, size_t);
+int readlink(const char*, char*, size_t);
 int mkdir(char*);
 int chdir(char*);
 int dup(int);

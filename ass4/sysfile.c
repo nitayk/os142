@@ -132,23 +132,22 @@ static struct inode* create(char *path, short type, short major, short minor);
 
 int //task1.b
 sys_readlink(void) {
-	 char *pathname, *buf;
-	// size_t bufsize;
-	 uint counter;
+	char *path, *pathbuffer;
+	//size_t bufsize;
+    
+    //if(argstr(0, &pathname) < 0 || argstr(1, &buf) < 0 || argint(2, bufsize) < 0)
+	if(argstr(0, &path) < 0 || argstr(1, &pathbuffer) < 0)
+        return -1;
 
-	 counter = 0;
-// if(argstr(0, &pathname) < 0 || argstr(1, &buf) < 0 || argint(2, bufsize) < 0)
-	  if(argstr(0, &pathname) < 0 || argstr(1, &buf) < 0)
-	    return -1;
+	// namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos, int noderef)
 
-	  if (nameiparent(pathname, buf) == 0)
-		  return -1;
-	  while (*buf) {		// how many bytes we wrote to buffer
-		  counter++ ;							// not including '\0'
-		  (*buf)++;
-	  }
-
-	return counter;
+    char name[DIRSIZ];
+    int index = 0;
+    pathbuffer[0] = '\0';
+    if (namex(path,0, name, 0, 0, 0, pathbuffer, &index, MAXPATH) == 0)
+		return -1;
+    
+	return index;
 }
 
 int //task1.b
@@ -372,7 +371,7 @@ sys_open(void)
   } else {
     noderef = omode & O_NODEREF;
     if((ip = namei(path,noderef)) == 0){
-      cprintf("DEBUG: #3\n");
+      //cprintf("DEBUG: #3\n");
       return -1;
       }
     ilock(ip);
@@ -485,7 +484,7 @@ sys_exec(void)
       return -1;
   }
 
-  if((ip = namei(path)) == 0)  // task2 - find i-node
+  if((ip = namei(path,0)) == 0)  // task2 - find i-node
        return -1;
 
   if (check_protected(ip,1) == -1)
@@ -547,7 +546,7 @@ sys_funprot(void) {
    if(argstr(0, &pathName) < 0 || argstr(1, &password) < 0)
       return -1;
 
-    if((ip = namei(pathName)) == 0)
+    if((ip = namei(pathName,0)) == 0)
       return -1;
 
     ilock(ip);
@@ -580,7 +579,7 @@ sys_fprot(void) {
     if(argstr(0, &pathName) < 0 || argstr(1, &password) < 0)
       return -1;
 
-    if((ip = namei(pathName)) == 0)  // get file i-node
+    if((ip = namei(pathName,0)) == 0)  // get file i-node
       return -1;
 
     ilock(ip);
@@ -612,7 +611,7 @@ sys_funlock(void) {
     if(argstr(0, &pathName) < 0 || argstr(1, &password) < 0)
       return -1;
 
-    if((ip = namei(pathName)) == 0)
+    if((ip = namei(pathName,0)) == 0)
       return -1;
 
     ilock(ip);
@@ -633,4 +632,3 @@ sys_funlock(void) {
 	   iunlock(ip);
   return 0;
 }
-

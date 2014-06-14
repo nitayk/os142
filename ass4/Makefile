@@ -163,6 +163,7 @@ UPROGS=\
 	_zombie\
 	_big\
 	_s2\
+	_s1\
 	_find\
 
 

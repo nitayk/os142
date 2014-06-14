@@ -212,7 +212,6 @@ iupdate(struct inode *ip)
   dip->nlink = ip->nlink;
   dip->size = ip->size;
   memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
-  memmove(dip->password, ip->password, sizeof(ip->password));  // task2 update new field
   log_write(bp);
   brelse(bp);
 }
@@ -297,7 +296,6 @@ ilock(struct inode *ip)
     ip->nlink = dip->nlink;
     ip->size = dip->size;
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
-    memmove(ip->password, dip->password, sizeof(ip->password)); // task2 update copying
     brelse(bp);
     ip->flags |= I_VALID;
     if(ip->type == 0)
@@ -654,8 +652,9 @@ skipelem(char *path, char *name)
 // Look up and return the inode for a path name.
 // If parent != 0, return the inode for the parent and copy the final
 // path element into name, which must have room for DIRSIZ bytes.
-static struct inode*
-namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos, int noderef)
+//static struct inode*
+struct inode*
+namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos, int noderef, char* pathbuffer, int* index, int pathbufsize)
 {
   struct inode *ip, *next;
   char buf[100], tname[DIRSIZ];
@@ -664,48 +663,84 @@ namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *las
 	  return 0;  // probably infinite loop.
   }
 
-  if(*path == '/')
+  if(*path == '/'){
+    *index = 1;
+    pathbuffer[0] = '/';
+    pathbuffer[1] = '\0';
     ip = iget(ROOTDEV, ROOTINO);
+  }
   else if (last_pos)
 	ip = idup(last_pos);		// need to remember last inode
   else
 	ip = idup(proc->cwd);
 
   while((path = skipelem(path, name)) != 0) {
+    
+    if(namecmp(name, "..") == 0){
+        // Need to delete last element from full path
+        if((*index) && !(*index == 1 && pathbuffer[0] == '/')){
+            while(*index && pathbuffer[*index] != '/')
+                    *index = (*index) - 1;
+            if(*index == 0 && pathbuffer[0] == '/')
+                    *index = (*index) + 1;
+            pathbuffer[*index] = '\0';
+        }
+    }
+    
     ilock(ip);
     if(ip->type != T_DIR){
       iunlockput(ip);
       return 0;
     }
     if(nameiparent && *path == '\0'){
-      // Stop one level early.
       iunlock(ip);
       return ip;
     }
     if((next = dirlookup(ip, name, 0)) == 0){
-      cprintf("could not find directory %s\n", name);
       iunlockput(ip);
       return 0;
     }
     iunlock(ip);
-    ilock(next);  // lock next inode
-    if(next->type == T_SYMLINK) {		// if symbolic link
+    ilock(next); 
+    if(next->type == T_SYMLINK) {
     	if(noderef && *path == '\0'){
             iunlock(next);
             iput(ip);
             return next;
         }
         
-        if(readi(next, buf, 0, next->size) != next->size) { // read pointed path
+        if(readi(next, buf, 0, next->size) != next->size) {
     		iunlockput(next);
     		iput(ip);
     		return 0;
     	}
-		buf[next->size] = 0;  // null terminated
+		buf[next->size] = 0; 
 		iunlockput(next);
-		next = namex(buf, 0, tname, l_counter+1, ip, 0);
+		next = namex(buf, 0, tname, l_counter+1, ip, 0, pathbuffer, index, pathbufsize);
     }  else {
-      iunlock(next);
+        // Check if we need to update pathbuffer
+        iunlock(next);
+        
+        if (namecmp(name, "..") != 0)
+        {
+            int len = strlen(name);
+            // Add '/' if necessary
+            if (*index && pathbufsize - *index > 0 && pathbuffer[(*index)-1] != '/'){
+                    pathbuffer[(*index)++] = '/';
+            }
+            
+            // case pathbuffer is full 
+            if(len >= pathbufsize - (*index)){
+                    iput(ip);
+                    *index = 0;
+                    buf[0] = '\0';
+                    return 0;
+            }
+            
+            memmove(pathbuffer + (*index), name, len);
+            *index = (*index) + len;
+            pathbuffer[(*index)] = '\0';
+        }
     }
     iput(ip);
     ip = next;
@@ -721,11 +756,15 @@ struct inode*
 namei(char *path, int noderef)
 {
   char name[DIRSIZ];
-  return namex(path, 0, name, 1, 0, noderef);
+  char pathbuffer[MAXPATH];
+  int index = 0;
+  return namex(path, 0, name, 1, 0, noderef, pathbuffer, &index, MAXPATH);
 }
 
 struct inode*
 nameiparent(char *path, char *name)
 {
-  return namex(path, 1, name, 1, 0, 0);
+  char pathbuffer[MAXPATH];
+  int index = 0;
+  return namex(path, 1, name, 1, 0, 0, pathbuffer, &index, MAXPATH);
 }
