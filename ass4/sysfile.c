@@ -133,18 +133,15 @@ static struct inode* create(char *path, short type, short major, short minor);
 int //task1.b
 sys_readlink(void) {
 	char *path, *pathbuffer;
-	//size_t bufsize;
+	int bufsize;
     
-    //if(argstr(0, &pathname) < 0 || argstr(1, &buf) < 0 || argint(2, bufsize) < 0)
-	if(argstr(0, &path) < 0 || argstr(1, &pathbuffer) < 0)
+	if(argstr(0, &path) < 0 || argstr(1, &pathbuffer) < 0 || argint(2, &bufsize) < 0)
         return -1;
-
-	// namex(char *path, int nameiparent, char *name, uint l_counter, struct inode *last_pos, int noderef)
 
     char name[DIRSIZ];
     int index = 0;
     pathbuffer[0] = '\0';
-    if (namex(path,0, name, 0, 0, 0, pathbuffer, &index, MAXPATH) == 0)
+    if (namex(path,0, name, 0, 0, 0, pathbuffer, &index, bufsize) == 0)
 		return -1;
     
 	return index;
