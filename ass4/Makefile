@@ -161,9 +161,8 @@ UPROGS=\
 	_sh\
 	_wc\
 	_zombie\
-	_big\
-	_s2\
 	_s1\
+	_s2\
 	_find\
 
 
