@@ -120,6 +120,22 @@ void find(char* path, int deref, char* name, char* type, int min_size, int max_s
     
 }
 
+void
+printusage()
+{
+	printf(1,"Usage: find <PATH> [OPTIONS] [PREDICATORS]\n");
+	printf(1,"PATH - Path to start search from.\n");
+	printf(1,"OPTIONS:\n");
+	printf(1,"\t-follow - Dereference symbolic links.\n");
+	printf(1,"\t-help - Show usage.\n");
+	printf(1,"PREDICATORS:\n");
+	printf(1,"\t-type <type>\n");
+	printf(1,"\t\td - Match only directories.\n");
+	printf(1,"\t\tf - Match only files.\n");
+	printf(1,"\t\ts - Match only symbolic links.\n");
+	printf(1,"\t-name <filename> - Match only files/dirs/links with name equal to <filename>.\n");
+	printf(1,"\t-size (+/-)n - Match only files/dirs/links with size bigger/smaller/equal to n.\n");
+}
 
 int
 main(int argc, char *argv[])
@@ -130,6 +146,11 @@ main(int argc, char *argv[])
     exit();
   }
   
+  if (argc == 2 && strcmp(argv[1],"-help") == 0){
+    printusage();
+    exit();
+  }
+
   char* path = argv[1];
   
   /* Default values */
@@ -146,7 +167,7 @@ main(int argc, char *argv[])
   /* Parsing arguments */
   for(i=2; i<argc; i++){
     if (strcmp(argv[i],"-help") == 0){
-        printf(1,"Usage: find <path> <options> <preds>\n");
+	printusage();
         exit();
     }
     else if (strcmp(argv[i],"-follow") == 0){
