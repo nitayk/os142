@@ -69,37 +69,32 @@ void find(char* path, int deref, char* name, char* type, int min_size, int max_s
     
     switch(st.type){
         case T_SYMLINK:
-            if (strcmp(type,"s") == 0 || strcmp(type,"*") == 0){
-                if (strcmp(name,"*") == 0 || strcmp(name,basenamed) == 0){
+            if ((strcmp(type,"s") == 0 || strcmp(type,"*") == 0)
+                && (strcmp(name,"*") == 0 || strcmp(name,basenamed) == 0) 
+                && (min_size == -1 || st.size > min_size) 
+                && (max_size == -1 || st.size < max_size) 
+                && (exact_size == -1 || exact_size == st.size)){
                     printf(1,"FOUND Link: %s\n",path);
                 }
-            }
             break;
         
         case T_FILE:
-            if (strcmp(name,"*") != 0 && strcmp(name,fmtname(path)) != 0){
-                break;
-            }
-            if (strcmp(type,"*") != 0 && strcmp(type,"f") != 0){
-                break;
-            }
-            if (min_size > -1 && st.size < min_size){
-                break;
-            }
-            if (max_size > -1 && st.size > max_size){
-                break;
-            }
-            if (exact_size > -1 && st.size != exact_size){
-                break;
-            }
-            printf(1,"FOUND File: %s\n",path);
+            if ((strcmp(type,"f") == 0 || strcmp(type,"*") == 0)
+                && (strcmp(name,"*") == 0 || strcmp(name,basenamed) == 0) 
+                && (min_size == -1 || st.size > min_size) 
+                && (max_size == -1 || st.size < max_size) 
+                && (exact_size == -1 || exact_size == st.size)){
+                    printf(1,"FOUND File: %s\n",path);
+                }
             break;
             
         case T_DIR:
-            if (strcmp(type,"d") == 0 || strcmp(type,"*") == 0){
-                if (strcmp(name,"*") == 0 || strcmp(name,basenamed) == 0){
+            if ((strcmp(type,"d") == 0 || strcmp(type,"*") == 0)
+                && (strcmp(name,"*") == 0 || strcmp(name,basenamed) == 0) 
+                && (min_size == -1 || st.size > min_size) 
+                && (max_size == -1 || st.size < max_size) 
+                && (exact_size == -1 || exact_size == st.size)){
                     printf(1,"FOUND Directory: %s\n",path);
-                }
             }
             strcpy(buf, path);
             p = buf+strlen(buf);
